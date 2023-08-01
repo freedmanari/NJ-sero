@@ -2,6 +2,7 @@
 require(tidyverse)
 require(cowplot)
 require(tigris)
+require(lubridate)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # make nice-looking scientific notation for plots
@@ -123,7 +124,7 @@ X1_region %>%
   scale_color_manual(values=c("red3","chartreuse4","dodgerblue3","black"),
                      guide="none") +
   scale_linetype_manual(values=c("solid","solid","solid","dashed"),
-                     guide="none") +
+                        guide="none") +
   scale_y_continuous(expand=expansion(mult=c(0,.05)),labels=fancy_scientific,
                      sec.axis = sec_axis(~ ./10, name = "population",labels=fancy_scientific)) +
   ylab("total cases") +
@@ -142,107 +143,107 @@ X1_region %>%
 
 # line graph of weekly cases for all three categories
 p1 <- data.frame(date=rep(get_week_start_from_test_week(1:(W-1)),3),
-           type=rep(c("PCR positives","Seropositives","Seropositives with past PCR positive"),each=(W-1)),
-           cases=c(X1[1:(W-1)],X2[1:(W-1)],X12[1:(W-1)])) %>%
-      ggplot() +
-      geom_line(aes(date,cases,group=type,color=type),size=1) +
-      ylab("weekly cases") +
-      scale_color_manual(values=c("red3","chartreuse4","dodgerblue3")) +
-      scale_x_date(expand=expansion(c(1/(2*(W-2))),1/(2*(W-2)))) +
-      scale_y_continuous(lim=c(0,40000), expand=expansion(c(.01,.02)), position="right", labels=fancy_scientific) +
-      theme(panel.grid=element_blank(),
-            panel.border=element_blank(),
-            panel.background=element_blank(),
-            axis.ticks.x=element_blank(),
-            axis.text.x=element_blank(),
-            axis.title.x=element_blank(),
-            axis.line=element_line(size=.3),
-            legend.position="none",
-            plot.margin = unit(c(2.5,5.5,-2.3,5.5), "pt"),
-            legend.key.size = unit(12, "pt"))
+                 type=rep(c("PCR positives","Seropositives","Seropositives with past PCR positive"),each=(W-1)),
+                 cases=c(X1[1:(W-1)],X2[1:(W-1)],X12[1:(W-1)])) %>%
+  ggplot() +
+  geom_line(aes(date,cases,group=type,color=type),size=1) +
+  ylab("weekly cases") +
+  scale_color_manual(values=c("red3","chartreuse4","dodgerblue3")) +
+  scale_x_date(expand=expansion(c(1/(2*(W-2))),1/(2*(W-2)))) +
+  scale_y_continuous(lim=c(0,40000), expand=expansion(c(.01,.02)), position="right", labels=fancy_scientific) +
+  theme(panel.grid=element_blank(),
+        panel.border=element_blank(),
+        panel.background=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.line=element_line(size=.3),
+        legend.position="none",
+        plot.margin = unit(c(2.5,5.5,-2.3,5.5), "pt"),
+        legend.key.size = unit(12, "pt"))
 
 # heatmap of new PCR positives
 p2 <- X1_region %>% 
-      group_by(region) %>%
-      summarise(date=date,X1=X1/max(X1)) %>% 
-      filter(date < get_week_start_from_test_week(W)) %>% 
-      ggplot() +
-      geom_tile(aes(x=date, y=region, fill=X1, color=X1), size=1) +
-      scale_fill_gradientn(colors = c("white","red3"),
-                           guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
-      scale_color_gradientn(colors = c("white","red3"),
-                            guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
-      scale_x_date(expand=c(0,0)) +
-      scale_y_discrete(expand=c(0,0)) +
-      ylab("") +
-      theme(axis.text.x=element_blank(),
-            axis.ticks.x=element_blank(),
-            axis.title.x=element_blank(),
-            axis.ticks.y=element_blank(),
-            axis.line.x=element_line(size=.3),
-            axis.line.y=element_blank(),
-            plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
-            legend.key.height = unit(11, "pt"),
-            legend.key.width = unit(14, "pt"),
-            legend.title = element_blank(),
-            legend.margin=margin(0,0,0,0),
-            legend.box.margin=margin(0,0,0,0),
-            legend.position="none")
+  group_by(region) %>%
+  summarise(date=date,X1=X1/max(X1)) %>% 
+  filter(date < get_week_start_from_test_week(W)) %>% 
+  ggplot() +
+  geom_tile(aes(x=date, y=region, fill=X1, color=X1), size=1) +
+  scale_fill_gradientn(colors = c("white","red3"),
+                       guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_color_gradientn(colors = c("white","red3"),
+                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_x_date(expand=c(0,0)) +
+  scale_y_discrete(expand=c(0,0)) +
+  ylab("") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.line.x=element_line(size=.3),
+        axis.line.y=element_blank(),
+        plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
+        legend.key.height = unit(11, "pt"),
+        legend.key.width = unit(14, "pt"),
+        legend.title = element_blank(),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(0,0,0,0),
+        legend.position="none")
 
 # heatmap of new seropositives
 p3 <- X2_region %>%
-      group_by(region) %>%
-      summarise(date=date,X2=X2/max(X2)) %>% 
-      filter(date < get_week_start_from_test_week(W)) %>% 
-      ggplot() +
-      geom_tile(aes(x=date, y=region, fill=X2, color=X2), size=1) +
-      scale_fill_gradientn(colors=c("white","chartreuse4"),
-                           guide=guide_colorbar(frame.color="black",ticks.color="black")) +
-      scale_color_gradientn(colors = c("white","chartreuse4"),
-                            guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
-      scale_x_date(expand=c(0,0)) +
-      scale_y_discrete(expand=c(0,0)) +
-      theme(axis.text.x=element_blank(),
-            axis.ticks.x=element_blank(),
-            axis.title.x=element_blank(),
-            axis.line.x=element_line(size=.3),
-            axis.line.y=element_blank(),
-            axis.ticks.y=element_blank(),
-            plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
-            legend.key.height = unit(11, "pt"),
-            legend.key.width = unit(14, "pt"),
-            legend.title = element_blank(),
-            legend.margin=margin(0,0,0,0),
-            legend.box.margin=margin(0,0,0,0),
-            legend.position="none")
+  group_by(region) %>%
+  summarise(date=date,X2=X2/max(X2)) %>% 
+  filter(date < get_week_start_from_test_week(W)) %>% 
+  ggplot() +
+  geom_tile(aes(x=date, y=region, fill=X2, color=X2), size=1) +
+  scale_fill_gradientn(colors=c("white","chartreuse4"),
+                       guide=guide_colorbar(frame.color="black",ticks.color="black")) +
+  scale_color_gradientn(colors = c("white","chartreuse4"),
+                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_x_date(expand=c(0,0)) +
+  scale_y_discrete(expand=c(0,0)) +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.line.x=element_line(size=.3),
+        axis.line.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
+        legend.key.height = unit(11, "pt"),
+        legend.key.width = unit(14, "pt"),
+        legend.title = element_blank(),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(0,0,0,0),
+        legend.position="none")
 
 # heatmap of new seropositives with past PCR positive
 p4 <- X12_region %>%
-      group_by(region) %>%
-      summarise(date=date,X12=X12/max(X12)) %>% 
-      filter(date < get_week_start_from_test_week(W)) %>% 
-      ggplot() +
-      geom_tile(aes(x=date, y=region, fill=X12, color=X12), size=1) +
-      scale_fill_gradientn(colors = c("white","dodgerblue3"),
-                           guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
-      scale_color_gradientn(colors = c("white","dodgerblue3"),
-                           guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
-      scale_x_date(date_labels="%b '%y", date_breaks="1 month", expand=c(0,0)) +
-      scale_y_discrete(expand=c(0,0)) +
-      ylab("") +
-      theme(axis.text.x=element_blank(),
-            axis.ticks.x=element_blank(),
-            axis.title.x=element_blank(),
-            axis.ticks.y=element_blank(),
-            axis.line.x=element_line(size=.4),
-            axis.line.y=element_blank(),
-            plot.margin = unit(c(0,5.5,0,5.5), "pt"),
-            legend.key.width = unit(14, "pt"),
-            legend.key.height = unit(11, "pt"),
-            legend.title = element_blank(),
-            legend.margin=margin(0,0,0,0),
-            legend.box.margin=margin(0,0,0,0),
-            legend.position="none")
+  group_by(region) %>%
+  summarise(date=date,X12=X12/max(X12)) %>% 
+  filter(date < get_week_start_from_test_week(W)) %>% 
+  ggplot() +
+  geom_tile(aes(x=date, y=region, fill=X12, color=X12), size=1) +
+  scale_fill_gradientn(colors = c("white","dodgerblue3"),
+                       guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_color_gradientn(colors = c("white","dodgerblue3"),
+                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_x_date(date_labels="%b '%y", date_breaks="1 month", expand=c(0,0)) +
+  scale_y_discrete(expand=c(0,0)) +
+  ylab("") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.line.x=element_line(size=.4),
+        axis.line.y=element_blank(),
+        plot.margin = unit(c(0,5.5,0,5.5), "pt"),
+        legend.key.width = unit(14, "pt"),
+        legend.key.height = unit(11, "pt"),
+        legend.title = element_blank(),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(0,0,0,0),
+        legend.position="none")
 
 # complete summary plot part b
 plot_grid(p1, p2, p3, p4, ncol=1, align="v", axis=c("lr"), rel_heights=c(2,1,1,1))
@@ -440,84 +441,89 @@ P_region %>%
 
 # PCR and serology testing volume over time by region,
 # part b of testing volume summary plot
+
+# line graph of weekly testing volume for both types of test
 p1 <-
   data.frame(date=get_week_start_from_test_week(1:(W-1)),
              PCR=P[1:(W-1)],
              serology=S[1:(W-1)]) %>%
-    pivot_longer(cols=-date, names_to="type", values_to="tests") %>% 
-    ggplot() +
-    geom_line(aes(x=date,y=tests,group=type,color=type),size=1) +
-    scale_x_date(date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,.01))) +
-    scale_y_continuous(name="weekly testing volume",
-                       expand=expansion(c(.005,.03)),
-                       position="right",
-                       labels=fancy_scientific) +
-    scale_color_manual(name="test type",values=c("red3","chartreuse4")) +
-    theme_bw() +
-    theme(panel.grid=element_blank(),
-          panel.border=element_blank(),
-          panel.background=element_blank(),
-          axis.line=element_line(size=.4),
-          axis.text.x=element_blank(),
-          axis.title.x=element_blank(),
-          axis.ticks.x=element_blank(),
-          legend.position="none",
-          plot.margin = unit(c(2.5,5.5,-2.3,5.5), "pt"))
+  pivot_longer(cols=-date, names_to="type", values_to="tests") %>% 
+  ggplot() +
+  geom_line(aes(x=date,y=tests,group=type,color=type),size=1) +
+  scale_x_date(date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,.01))) +
+  scale_y_continuous(name="weekly testing volume",
+                     expand=expansion(c(.005,.03)),
+                     position="right",
+                     labels=fancy_scientific) +
+  scale_color_manual(name="test type",values=c("red3","chartreuse4")) +
+  theme_bw() +
+  theme(panel.grid=element_blank(),
+        panel.border=element_blank(),
+        panel.background=element_blank(),
+        axis.line=element_line(size=.4),
+        axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        legend.position="none",
+        plot.margin = unit(c(2.5,5.5,-2.3,5.5), "pt"))
 
+# heatmap of total PCR testing volume
 p2 <- 
   P_region %>% 
-    group_by(region) %>%
-    summarise(date=date,P=P/max(P)) %>% 
-    filter(date < get_week_start_from_test_week(W)) %>% 
-    ggplot() +
-    geom_tile(aes(x=date, y=region, fill=P, color=P), size=1) +
-    scale_fill_gradientn(colors = c("white","red3"),
-                         guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
-    scale_color_gradientn(colors = c("white","red3"),
-                          guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
-    scale_x_date(expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0)) +
-    ylab("") +
-    theme(axis.text.x=element_blank(),
-          axis.ticks.x=element_blank(),
-          axis.title.x=element_blank(),
-          axis.ticks.y=element_blank(),
-          axis.line.x=element_line(size=.3),
-          axis.line.y=element_blank(),
-          plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
-          legend.key.height = unit(11, "pt"),
-          legend.key.width = unit(14, "pt"),
-          legend.title = element_blank(),
-          legend.margin=margin(0,0,0,0),
-          legend.box.margin=margin(0,0,0,0),
-          legend.position="none")
+  group_by(region) %>%
+  summarise(date=date,P=P/max(P)) %>% 
+  filter(date < get_week_start_from_test_week(W)) %>% 
+  ggplot() +
+  geom_tile(aes(x=date, y=region, fill=P, color=P), size=1) +
+  scale_fill_gradientn(colors = c("white","red3"),
+                       guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_color_gradientn(colors = c("white","red3"),
+                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_x_date(expand=c(0,0)) +
+  scale_y_discrete(expand=c(0,0)) +
+  ylab("") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.line.x=element_line(size=.3),
+        axis.line.y=element_blank(),
+        plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
+        legend.key.height = unit(11, "pt"),
+        legend.key.width = unit(14, "pt"),
+        legend.title = element_blank(),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(0,0,0,0),
+        legend.position="none")
 
+# heatmap of total serology testing volume
 p3 <-
   S_region %>% 
-    group_by(region) %>%
-    summarise(date=date,S=S/max(S)) %>% 
-    filter(date < get_week_start_from_test_week(W)) %>% 
-    ggplot() +
-    geom_tile(aes(x=date, y=region, fill=S, color=S), size=1) +
-    scale_fill_gradientn(colors = c("white","chartreuse4"),
-                         guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
-    scale_color_gradientn(colors = c("white","chartreuse4"),
-                          guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
-    scale_x_date(date_labels="%b '%y", date_breaks="1 month", expand=c(0,0)) +
-    scale_y_discrete(expand=c(0,0)) +
-    ylab("region") +
-    theme(axis.text.x=element_text(angle=90),
-          axis.ticks.y=element_blank(),
-          axis.line.x=element_line(size=.4),
-          axis.line.y=element_blank(),
-          plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
-          legend.key.height = unit(11, "pt"),
-          legend.key.width = unit(14, "pt"),
-          legend.title = element_blank(),
-          legend.margin=margin(0,0,0,0),
-          legend.box.margin=margin(0,0,0,0),
-          legend.position="none")
+  group_by(region) %>%
+  summarise(date=date,S=S/max(S)) %>% 
+  filter(date < get_week_start_from_test_week(W)) %>% 
+  ggplot() +
+  geom_tile(aes(x=date, y=region, fill=S, color=S), size=1) +
+  scale_fill_gradientn(colors = c("white","chartreuse4"),
+                       guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_color_gradientn(colors = c("white","chartreuse4"),
+                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_x_date(date_labels="%b '%y", date_breaks="1 month", expand=c(0,0)) +
+  scale_y_discrete(expand=c(0,0)) +
+  ylab("region") +
+  theme(axis.text.x=element_text(angle=90),
+        axis.ticks.y=element_blank(),
+        axis.line.x=element_line(size=.4),
+        axis.line.y=element_blank(),
+        plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
+        legend.key.height = unit(11, "pt"),
+        legend.key.width = unit(14, "pt"),
+        legend.title = element_blank(),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(0,0,0,0),
+        legend.position="none")
 
+# complete testing volume summary plot part b
 aligned <- align_plots(p2, p3, align = "vh", axis=c("lrtb"))
 plot_grid(p1, aligned[[1]], aligned[[2]], ncol=1, align="v", axis=c("lr"), rel_heights=c(1,1,1))
 
@@ -557,11 +563,19 @@ prop_prev_pcr_all %>%
 
 
 
-
-
-
-
-
-
+## histogram of testing dates for the serology tests used in the serology model
+model_sero %>%
+  count(month=get_test_month(test_date)) %>% 
+  ggplot +
+  geom_bar(aes(month,n), stat="identity", position = position_nudge(x = 0.5), width=1,
+           color="white") +
+  scale_x_continuous(breaks=min(get_test_month(model_sero$test_date)):max(get_test_month(model_sero$test_date)),
+                     labels=function(m) format(floor_date(min_date %m+% months(m-1), "month"), "%b '%y"),
+                     expand=c(0,0)) +
+  scale_y_continuous(expand=expansion(c(0,.05))) +
+  theme_classic() +
+  theme(axis.text.x=element_text(angle=90)) +
+  xlab("month of test date") +
+  ylab("count")
 
 

@@ -47,7 +47,7 @@ interval_mins <- c(1:5)
 interval_weights <- matrix(0, length(interval_mins), W)
 
 interval_probs <- 
-  expand.grid(delay_int=sort(unique(model_sero$delay_int[model_sero$delay>=0])),
+  expand.grid(delay_int=sort(unique(model_sero_prev_PCR$delay_int[model_sero_prev_PCR$delay>=0])),
               interval=1:length(interval_mins)) %>% 
   left_join(model_sero_prev_PCR %>%
             mutate(interval=findInterval(y_data, interval_mins)) %>% 

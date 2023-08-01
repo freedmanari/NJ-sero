@@ -271,6 +271,7 @@ for (i in 1:length(interval_mins)) {
           theme_bw() +
           theme(panel.background=element_blank(),
                 panel.border=element_blank(),
+                panel.grid=element_blank(),
                 axis.line=element_line(size=.3),
                 plot.title = element_text(hjust = 0.5)))
 }
