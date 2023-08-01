@@ -118,18 +118,18 @@ colnames(delay_dists) <- 0:(W-1)
 
 stan_summary <- function(s) summary(s)$summary[,"mean"]
 
-reps <- 10
+sero_model_reps <- 10
 show_progress <- TRUE
 
-I_indices <- sample(1:length(Is[[1]]), reps, replace=F)
+I_indices <- sample(1:thetas_reps, sero_model_reps, replace=F)
 best_r <- which.min(abs(sapply(I_indices, function(i) sum(unlist(lapply(Is, function(w) w[i]))))-sum(I_best)))
 I_indices <- c(I_indices[-best_r], I_indices[best_r])
 
 ## model for main text with r_SV=1
 r_SV <- 1
-sero_model_summs_normal_r_SV <- vector(mode="list", length=reps)
+sero_model_summs_normal_r_SV <- vector(mode="list", length=sero_model_reps)
 
-for (r in 1:reps) {
+for (r in 1:sero_model_reps) {
   if (show_progress) {
     print(r)
   }
@@ -246,9 +246,9 @@ model_sero_normal_r_SV <-
 
 ## Supplementary sensitivity analysis with low r_SV
 r_SV <- .5
-sero_model_summs_low_r_SV <- vector(mode="list", length=reps)
+sero_model_summs_low_r_SV <- vector(mode="list", length=sero_model_reps)
 
-for (r in 1:reps) {
+for (r in 1:sero_model_reps) {
   if (show_progress) {
     print(r)
   }
@@ -354,9 +354,9 @@ model_sero_low_r_SV <-
 
 ## supplementary sensitivity analysis with high r_SV
 r_SV <- 2
-sero_model_summs_high_r_SV <- vector(mode="list", length=reps)
+sero_model_summs_high_r_SV <- vector(mode="list", length=sero_model_reps)
 
-for (r in 1:reps) {
+for (r in 1:sero_model_reps) {
   if (show_progress) {
     print(r)
   }

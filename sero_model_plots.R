@@ -284,7 +284,7 @@ for (i in 1:length(interval_mins)) {
 
 ## sero model fit
 
-summ <- sero_model_summs[[reps]]
+summ <- sero_model_summs[[sero_model_reps]]
 
 model_sero %>%
   cbind(y_pred_stan=summ[grep("y_pred[1-9]", names(summ))]) %>% 
@@ -321,7 +321,7 @@ model_sero %>%
 ## sero model fits for just tests with past PCR positive, across all simulations
 
 stan_preds_prev_PCR <- data.frame(r=numeric(), date=Date(), y=numeric())
-for (r in 1:reps) {
+for (r in 1:sero_model_reps) {
   summ <- sero_model_summs[[r]]
   temp <-
     model_sero %>%
@@ -346,7 +346,7 @@ y_data_prev_PCR <-
 
 
 stan_preds_no_prev_PCR <- data.frame(r=numeric(), date=Date(), y=numeric())
-for (r in 1:reps) {
+for (r in 1:sero_model_reps) {
   summ <- sero_model_summs[[r]]
   temp <-
     model_sero %>%
@@ -418,7 +418,7 @@ stan_preds_no_prev_PCR %>%
 
 # r_VP fits
 r_VPs <- data.frame(r=numeric(), x=numeric(), y=numeric())
-for (r in 1:reps) {
+for (r in 1:sero_model_reps) {
   summ <- sero_model_summs[[r]]
   r_VPs <- rbind(r_VPs, data.frame(r=r, x=c(w_vac,summ["r_VP_switch"],W), y=summ[c("r_VP_init","r_VP_init","r_VP_end")]))
 }
@@ -446,11 +446,11 @@ ggplot(r_VPs) +
 
 # other important parameters, for supplement
 
-p1 <- data.frame(rep=as.factor(1:reps),
+p1 <- data.frame(rep=as.factor(1:sero_model_reps),
                  I_total=sapply(I_indices, function(i) sum(unlist(lapply(Is, function(w) w[i]))))) %>%
   pivot_longer(cols=-rep, names_to="parameter", values_to="value") %>% 
   ggplot() +
-  geom_point(aes(x=parameter,y=value,col=rep),position=position_jitter(width=.1)) +
+  geom_point(aes(x=parameter,y=value,col=rep),position=position_jitter(w=0.1, h=0)) +
   scale_x_discrete(labels="<i>I</i><sub>total</sub>") +
   scale_y_continuous(limits=c(2.5e6-(5e6-2.5e6)*.05,5e6+(5e6-2.5e6)*.05),
                      expand=expansion(c(0,0)),
@@ -467,11 +467,11 @@ p2 <- sero_model_summs %>%
   lapply(function(s) s[c("sigma","psi","r_SI","r_VP_init","r_VP_end")]) %>%
   do.call(what=rbind) %>%
   as.data.frame() %>% 
-  cbind(rep=as.factor(1:reps)) %>% 
+  cbind(rep=as.factor(1:sero_model_reps)) %>% 
   pivot_longer(cols=-rep, names_to="parameter", values_to="value") %>%
   mutate(parameter=factor(parameter, levels=c("sigma","psi","r_SI","r_VP_init","r_VP_end"))) %>% 
   ggplot() +
-  geom_point(aes(x=parameter,y=value,col=rep),position=position_jitter(width=.1)) +
+  geom_point(aes(x=parameter,y=value,col=rep),position=position_jitter(w=0.1, h=0)) +
   scale_x_discrete(labels=c("<i>\u03C3</i>",
                             "<i>\u03C8</i>",
                             "<i>r</i><sub><i>SI</i></sub>",
@@ -486,11 +486,11 @@ p2 <- sero_model_summs %>%
         axis.title.y=element_blank(),
         axis.text.x=element_markdown())
 
-p3 <- data.frame(rep=as.factor(1:reps),
+p3 <- data.frame(rep=as.factor(1:sero_model_reps),
                  r_VP_switch=get_week_start_from_test_week(unlist(lapply(sero_model_summs, function(s) s["r_VP_switch"])))) %>% 
   pivot_longer(cols=-rep, names_to="parameter", values_to="value") %>% 
   ggplot() +
-  geom_point(aes(x=parameter,y=value,col=rep),position=position_jitter(width=.1)) +
+  geom_point(aes(x=parameter,y=value,col=rep),position=position_jitter(w=0.1, h=0)) +
   scale_x_discrete(labels="<i>w</i><sub>switch</sub>") +
   scale_y_date(limits=c(as.Date("2021-06-12")-as.numeric(as.Date("2021-07-07")-as.Date("2021-06-12"))*.05,
                         as.Date("2021-07-07")+as.numeric(as.Date("2021-07-07")-as.Date("2021-06-12"))*.05),
@@ -515,7 +515,7 @@ title <-
              fontface="bold")
 
 # uncomment the next two commented-out lines in order to save pdf with the special characters coming out right
-# quartz(type = "pdf", file = "figures/supplementary/parameter_fits.pdf", width=par()$fin[1], height=par()$fin[2])
+# quartz(type = "pdf", file = "parameter_fits.pdf", width=par()$fin[1], height=par()$fin[2])
 plot_grid(title,pg,ncol=1,rel_heights=c(.1,1))
 # dev.off()
 
@@ -526,7 +526,7 @@ plot_grid(title,pg,ncol=1,rel_heights=c(.1,1))
 
 ## predicated vaccination probability by past PCR positive over time
 
-summ <- sero_model_summs[[reps]]
+summ <- sero_model_summs[[sero_model_reps]]
 
 model_sero %>% 
   cbind(vac_pred=summ[grep("^vac_pred", names(summ))]) %>% 

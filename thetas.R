@@ -334,7 +334,7 @@ theta_I_S <- vector(mode="list",length=W)
 theta_Pp_P <- vector(mode="list",length=W)
 theta_Pp_S <- vector(mode="list",length=W)
 
-reps <- 1000
+thetas_reps <- 1000
 conf <- .95
 show_progress <- TRUE
 calculate_odds_ratios <- TRUE
@@ -345,9 +345,9 @@ kS <- 16936 / #nrow(filter(all_sero, prev_PCR, test_week<w_vac, result=="N")) /
       59971   #nrow(filter(all_sero, prev_PCR, test_week<w_vac))
 
 r <- 1
-while (r <= reps) {
-  if (show_progress & r %% (reps/100)==0) {
-    print(r/(reps/100))
+while (r <= thetas_reps) {
+  if (show_progress & r %% (thetas_reps/100)==0) {
+    print(r/(thetas_reps/100))
   }
 
   
@@ -466,30 +466,30 @@ while (r <= reps) {
 
 Is_sorted <- lapply(Is, sort)
 I_best <- Is_sorted %>% lapply(function(w) ifelse(is.null(w), NA, mean(w))) %>% unlist
-I_lower <- Is_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1-conf)/2)+1])) %>% unlist
-I_upper <- Is_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1+conf)/2)])) %>% unlist
+I_lower <- Is_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1-conf)/2)+1])) %>% unlist
+I_upper <- Is_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1+conf)/2)])) %>% unlist
 
 
 if (calculate_odds_ratios) {
   theta_I_P_sorted <- lapply(theta_I_P, sort)
   theta_I_P_best <- theta_I_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, mean(w))) %>% unlist
-  theta_I_P_lower <- theta_I_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1-conf)/2)+1])) %>% unlist
-  theta_I_P_upper <- theta_I_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1+conf)/2)])) %>% unlist
+  theta_I_P_lower <- theta_I_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1-conf)/2)+1])) %>% unlist
+  theta_I_P_upper <- theta_I_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1+conf)/2)])) %>% unlist
   
   theta_I_S_sorted <- lapply(theta_I_S, sort)
   theta_I_S_best <- theta_I_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, mean(w))) %>% unlist
-  theta_I_S_lower <- theta_I_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1-conf)/2)+1])) %>% unlist
-  theta_I_S_upper <- theta_I_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1+conf)/2)])) %>% unlist
+  theta_I_S_lower <- theta_I_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1-conf)/2)+1])) %>% unlist
+  theta_I_S_upper <- theta_I_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1+conf)/2)])) %>% unlist
   
   theta_Pp_P_sorted <- lapply(theta_Pp_P, sort)
   theta_Pp_P_best <- theta_Pp_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, mean(w))) %>% unlist
-  theta_Pp_P_lower <- theta_Pp_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1-conf)/2)+1])) %>% unlist
-  theta_Pp_P_upper <- theta_Pp_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1+conf)/2)])) %>% unlist
+  theta_Pp_P_lower <- theta_Pp_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1-conf)/2)+1])) %>% unlist
+  theta_Pp_P_upper <- theta_Pp_P_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1+conf)/2)])) %>% unlist
   
   theta_Pp_S_sorted <- lapply(theta_Pp_S, sort)
   theta_Pp_S_best <- theta_Pp_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, mean(w))) %>% unlist
-  theta_Pp_S_lower <- theta_Pp_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1-conf)/2)+1])) %>% unlist
-  theta_Pp_S_upper <- theta_Pp_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(reps*(1+conf)/2)])) %>% unlist
+  theta_Pp_S_lower <- theta_Pp_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1-conf)/2)+1])) %>% unlist
+  theta_Pp_S_upper <- theta_Pp_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1+conf)/2)])) %>% unlist
 }
 
 
