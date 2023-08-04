@@ -251,29 +251,29 @@ model_sero_prev_PCR %>%
 
 ## plot the interval weights used for simulating delays for serology tests with no past PCR positive
 
+
 for (i in 1:length(interval_mins)) {
-  print(interval_probs %>%
-          filter(interval==i) %>%
-          ggplot() +
-          geom_point(aes(delay,p)) +
-          geom_function(fun = ~dggamma(.x, interval_weight_pars[i,1], interval_weight_pars[i,2], interval_weight_pars[i,3]) / interval_weight_pars[i,4],
-                        col="red",
-                        xlim=c(.0001,max(interval_probs$delay)),
-                        n=50000) +
-          scale_x_continuous(name="delay from PCR positive to serology test (weeks)",
-                             expand=expansion(c(.01,.05))) +
-          scale_y_continuous(name="interval weight",
-                             expand=expansion(c(.01,.05)),
-                             limits=c(0,1.1*max(interval_probs$p[interval_probs$interval==i]))) +
-          ggtitle(ifelse(i<length(interval_mins),
-                         paste("weights for log-titers in interval [",i,",",i+1,")",sep=""),
-                         paste("weights for log-titers in interval [",i,",\u221E)",sep=""))) +
-          theme_bw() +
-          theme(panel.background=element_blank(),
-                panel.border=element_blank(),
-                panel.grid=element_blank(),
-                axis.line=element_line(size=.3),
-                plot.title = element_text(hjust = 0.5)))
+  print(
+    interval_probs %>%
+    filter(interval==i) %>%
+    ggplot() +
+    geom_point(aes(delay,p)) +
+    geom_function(fun = ~dggamma(.x, interval_weight_pars[i,1], interval_weight_pars[i,2], interval_weight_pars[i,3]) / interval_weight_pars[i,4],
+                  col="red",
+                  xlim=c(.0001,max(interval_probs$delay)),
+                  n=50000) +
+    scale_x_continuous(name="delay from PCR positive to serology test (weeks)",
+                       expand=expansion(c(.01,.05))) +
+    scale_y_continuous(name="interval weight",
+                       expand=expansion(c(.01,.05)),
+                       limits=c(0,1.1*max(interval_probs$p[interval_probs$interval==i]))) +
+    ggtitle(paste("weights for log-titers in interval [",i,",",i+1,")",sep="")) +
+    theme_bw() +
+    theme(panel.background=element_blank(),
+          panel.border=element_blank(),
+          panel.grid=element_blank(),
+          axis.line=element_line(size=.3),
+          plot.title = element_text(hjust = 0.5)))
 }
 
 
