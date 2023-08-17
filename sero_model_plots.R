@@ -595,3 +595,24 @@ prop_infected_by_age(I_best) %>%
         axis.text.x = element_text(angle = 90))
 
 
+
+## proportions of people in model_sero who have had past PCR positive, by whether they are younger or older than 40
+
+model_sero %>%
+  group_by(age_group=ifelse(age>=40, "older than 40", "younger than 40"),
+           month=floor_date(min_date %m+% months(test_month-1), "month")) %>%
+  summarise(prop_prev_PCR = sum(prev_PCR) / n()) %>%
+  ggplot() +
+  geom_line(aes(month, prop_prev_PCR, group=age_group, col=age_group),size=.7) +
+  scale_color_manual(name="age group", values=c("limegreen","brown2")) +
+  theme_classic() +
+  scale_x_date(date_labels="%b '%y",date_breaks="1 month") +
+  scale_y_continuous(expand=c(0,0), limits=c(0,.3001)) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  xlab("test month") +
+  ylab("proportion of serology tests\nwith past PCR positive")
+
+
+
+
+
