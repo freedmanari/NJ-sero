@@ -5,6 +5,7 @@ require(tidyverse)
 require(colorspace)
 require(rstan)
 require(cowplot)
+require(funtimes)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # make nice-looking scientific notation for plots
@@ -96,8 +97,15 @@ plot_correlation <- function(I, theta, start_index) {
                      limits=as.Date(c("2020-05-01","2021-9-21")))
 }
 
-plot_correlation(I_best, theta_I_P_best, 10)
-plot_correlation(I_best, theta_I_S_best, 10)
-plot_correlation(I_best, theta_Pp_P_best, 10)
-plot_correlation(I_best, theta_Pp_S_best, 10)
+plot_correlation(I_best, theta_I_P_best, 6)
+plot_correlation(I_best, theta_I_S_best, 6)
+plot_correlation(I_best, theta_Pp_P_best, 6)
+plot_correlation(I_best, theta_Pp_S_best, 6)
+
+ccf_boot(I_best[6:W],theta_I_P_best[6:W],plot="Spearman",B=10000,lag.max = 11)
+ccf_boot(I_best[6:W],theta_I_S_best[6:W],plot="Spearman",B=10000,lag.max = 11)
+ccf_boot(I_best[6:W],theta_Pp_P_best[6:W],plot="Spearman",B=10000,lag.max = 11)
+ccf_boot(I_best[6:W],theta_Pp_S_best[6:W],plot="Spearman",B=10000,lag.max = 11)
+
+
 
