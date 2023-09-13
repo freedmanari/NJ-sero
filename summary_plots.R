@@ -126,7 +126,7 @@ X1_region %>%
   scale_linetype_manual(values=c("solid","solid","solid","dashed"),
                         guide="none") +
   scale_y_continuous(expand=expansion(mult=c(0,.05)),labels=fancy_scientific,
-                     sec.axis = sec_axis(~ ./10, name = "population",labels=fancy_scientific)) +
+                     sec.axis = sec_axis(~ .*10, name = "population",labels=fancy_scientific)) +
   ylab("total cases") +
   theme(panel.background=element_blank(),
         axis.line=element_line(size=.4),

@@ -1,6 +1,6 @@
-Data and code in NJ-serology repository at https://github.com/freedmanari
-- All code by Ari Freedman
-- Scripts (not included) for acquiring data from New Jersey Department of Health all written by Justin Sheen
+Data and code in NJ-sero repository at https://github.com/freedmanari
+- All code by Ari S. Freedman
+- Scripts (not included) for acquiring data from New Jersey (NJ) Department of Health all written by Justin K. Sheen
 
 --------------------------
 
