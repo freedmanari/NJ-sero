@@ -132,7 +132,7 @@ conf_diff <- function(sd,level=.95)
   plnorm(IFR_lower,log(IFR_mean^2/sqrt(sd^2+IFR_mean^2)),sqrt(log(sd^2/IFR_mean^2+1)))-
   level
 
-IFR_sd <- uniroot(conf_diff,c(.001,.005),tol=1e-7)$root
+IFR_sd <- uniroot(conf_diff,c(.001,.005),tol=1e-7)$root #finding sd assuming log-normally distributed
 IFR_mu <- log(IFR_mean^2/sqrt(IFR_sd^2+IFR_mean^2))
 IFR_sigma <- sqrt(log(IFR_sd^2/IFR_mean^2+1))
 
@@ -340,7 +340,7 @@ show_progress <- TRUE
 calculate_odds_ratios <- TRUE
 
 # false negative rates for PCR and serology tests, respectively
-kP <- .2  # estimate from Kucirka et al. 2020 (https://www.acpjournals.org/doi/10.7326/M20-1495) and He et al. 2020 (https://www.sciencedirect.com/science/article/pii/S0954611120301207?via%3Dihub)     
+kP <- .2  # rough estimate from Kucirka et al. 2020 (https://www.acpjournals.org/doi/10.7326/M20-1495) and He et al. 2020 (https://www.sciencedirect.com/science/article/pii/S0954611120301207?via%3Dihub)     
 kS <- 16936 / #nrow(filter(all_sero, prev_PCR, test_week<w_vac, result=="N")) /
       59971   #nrow(filter(all_sero, prev_PCR, test_week<w_vac))
 

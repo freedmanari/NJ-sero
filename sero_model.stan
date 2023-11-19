@@ -8,32 +8,34 @@ data {
   real ymin;
   real ymax;
   int<lower=1> w_vac;
-  vector<lower=ymin,upper=ymax>[D1] y1;
-  vector<lower=ymin,upper=ymax>[D2] y2;
-  vector<lower=ymin,upper=ymax>[D_grouped] y_mean;
-  vector<lower=1,upper=fmax(D1,D2)>[D_grouped] n;
-  int<lower=1,upper=D_grouped> row1[D1];
-  int<lower=1,upper=D_grouped> row2[D2];
-  vector<lower=0,upper=W>[D1] tau1;
-  vector<lower=0,upper=W>[D2] tau2;
-  int<lower=1,upper=W> w1[D1];
-  int<lower=1,upper=W> w2[D2];
-  int<lower=1,upper=M> m1[D1];
-  int<lower=1,upper=M> m2[D2];
-  int<lower=1,upper=A> a1[D1];
-  int<lower=1,upper=A> a2[D2];
-  vector<lower=0,upper=1>[D1] V1;
-  vector<lower=0,upper=1>[D2] V2;
-  vector<lower=0,upper=1>[D2] I;
-  int<lower=0,upper=1> result[D2]; //"N"=0, "P"=1
-  vector<lower=0,upper=1>[M] prop_prev_PCR;
-  vector<lower=0,upper=1>[M] D2_prop_pos;
+  array[D1] real<lower=ymin,upper=ymax> y1;
+  array[D2] real<lower=ymin,upper=ymax> y2;
+  array[D_grouped] real<lower=ymin,upper=ymax> y_mean;
+  vector<lower=1,upper=fmax(D1,D2)>[D_grouped] n; // this notation is deprecated but elementwise
+  // division ./ doesn't work with arrays yet. Once that is fixed, this line can be changed to
+  // array[D_grouped] int<lower=1,upper=fmax(D1,D2)> n;
+  array[D1] int<lower=1,upper=D_grouped> row1;
+  array[D2] int<lower=1,upper=D_grouped> row2;
+  array[D1] real<lower=0,upper=W> tau1;
+  array[D2] real<lower=0,upper=W> tau2;
+  array[D1] int<lower=1,upper=W> w1;
+  array[D2] int<lower=1,upper=W> w2;
+  array[D1] int<lower=1,upper=M> m1;
+  array[D2] int<lower=1,upper=M> m2;
+  array[D1] int<lower=1,upper=A> a1;
+  array[D2] int<lower=1,upper=A> a2;
+  array[D1] real<lower=0,upper=1> V1;
+  array[D2] real<lower=0,upper=1> V2;
+  array[D2] real<lower=0,upper=1> I;
+  array[D2] int<lower=0,upper=1> result; //"N"=0, "P"=1
+  array[M] real<lower=0,upper=1> prop_prev_PCR;
+  array[M] real<lower=0,upper=1> D2_prop_pos;
   real<lower=0,upper=1> kS;
-  vector<lower=0>[A] s;
-  vector<lower=0>[A] h;
-  vector<lower=0>[A] alpha;
-  vector<lower=0>[A] beta;
-  vector<lower=0>[A] lambda;
+  array[A] real<lower=0> s;
+  array[A] real<lower=0> h;
+  array[A] real<lower=0> alpha;
+  array[A] real<lower=0> beta;
+  array[A] real<lower=0> lambda;
   real<lower=0> r_SV;
 }
 
@@ -74,13 +76,13 @@ transformed parameters {
   real no_vac;
   real vac;
   
-  vector[D1] y_pred1;
-  vector[D2] y_pred2;
+  array[D1] real y_pred1;
+  array[D2] real y_pred2;
   
-  vector[D_grouped] y_pred_grouped = rep_vector(0, D_grouped);
+  array[D_grouped] real y_pred_grouped = rep_array(0, D_grouped);
   
-  vector[D1] vac_pred1;
-  vector[D2] vac_pred2;
+  array[D1] real vac_pred1;
+  array[D2] real vac_pred2;
   
   for (i in 1:D1) {
     if (w1[i] <= r_VP_switch) {
@@ -95,7 +97,7 @@ transformed parameters {
     PV_noPpS = fmin(PV_S / (r_VP*PPp_S + (1-PPp_S)), 1);
     PV_PpS = fmin(PV_S*r_VP / (r_VP*PPp_S + (1-PPp_S)), 1);
     
-    no_vac = s[a1[i]] + PI_PpS * h[a1[i]] * gamma_cdf(tau1[i], alpha[a1[i]], beta[a1[i]]) * exp(-lambda[a1[i]]*tau1[i]);
+    no_vac = s[a1[i]] + PI_PpS * h[a1[i]] * exp(gamma_lcdf(tau1[i] | alpha[a1[i]], beta[a1[i]]) - lambda[a1[i]]*tau1[i]);
     vac = no_vac + psi;
     
     y_pred1[i] = (1-PV_PpS) * no_vac + PV_PpS * vac;
@@ -133,7 +135,7 @@ transformed parameters {
     PV_noPpSn = fmin(PSn_noPpVS * PV_noPpS / PSn_noPpS, 1);
     
     if (result[i]==1) {
-      no_vac = s[a2[i]] + PI_noPpSp * h[a2[i]] * gamma_cdf(tau2[i], alpha[a2[i]], beta[a2[i]]) * exp(-lambda[a2[i]]*tau2[i]);
+      no_vac = s[a2[i]] + PI_noPpSp * h[a2[i]] * exp(gamma_lcdf(tau2[i] | alpha[a2[i]], beta[a2[i]]) - lambda[a2[i]]*tau2[i]);
       vac = no_vac + psi;
     
       y_pred2[i] = (1-PV_noPpSp) * no_vac + PV_noPpSp * vac;
@@ -141,7 +143,7 @@ transformed parameters {
       
       vac_pred2[i] = PV_noPpSp;
     } else {
-      no_vac = s[a2[i]] + PI_noPpSn * h[a2[i]] * gamma_cdf(tau2[i], alpha[a2[i]], beta[a2[i]]) * exp(-lambda[a2[i]]*tau2[i]);
+      no_vac = s[a2[i]] + PI_noPpSn * h[a2[i]] * exp(gamma_lcdf(tau2[i] | alpha[a2[i]], beta[a2[i]]) - lambda[a2[i]]*tau2[i]);
       vac = no_vac + psi;
     
       y_pred2[i] = (1-PV_noPpSn) * no_vac + PV_noPpSn * vac;

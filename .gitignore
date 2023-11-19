@@ -1,6 +1,7 @@
 figures
 .DS_Store
 .Rhistory
+.RData
 sero_tests.csv
 model_sero.csv
 sero_tests_by_day.csv
