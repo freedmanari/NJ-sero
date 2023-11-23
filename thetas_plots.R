@@ -41,10 +41,10 @@ plot_theta <- function(theta_best, theta_lower, theta_upper, zero_line=T, ylab="
           panel.border=element_blank(),
           axis.text.x = element_text(angle = 90),
           legend.position = "none",
-          axis.line = element_line(colour = "black", size=.3))
+          axis.line = element_line(colour = "black", linewidth=.3))
     if (zero_line) {
       plot +
-        geom_hline(yintercept=0, col="red", size=.3) +
+        geom_hline(yintercept=0, col="red", linewidth=.3) +
         scale_y_continuous(name=ylab)
     } else {
       plot +

@@ -179,28 +179,54 @@ prop_vaccinated_age_group_mins <-
   to_age_group_min %>% 
   na.omit %>%
   c
-prop_infected_age_group_mins <-
-  read.csv("data/NJ_incidence_by_age.csv") %>%
-  colnames %>%
-  grep(pattern="ages", value=TRUE) %>%
-  to_age_group_min() %>% 
-  sort()
 
-### New vaccinations per week
+# seroprevalence data from
+# https://data.cdc.gov/Laboratory-Surveillance/Nationwide-Commercial-Laboratory-Seroprevalence-Su/d2tw-32xv
+NJ_seroprevelance_by_age_raw <-
+  read.csv("data/Nationwide_Commercial_Laboratory_Seroprevalence_Survey.csv") %>%
+  filter(Site=="NJ") %>% 
+  mutate(date = as.Date(str_remove(Date.Range.of.Specimen.Collection, "(.*)-( *)"), format="%b %d, %Y"),
+         `0` = Rate......Anti.N..0.17.Years.Prevalence.,
+         `18` = Rate......Anti.N..18.49.Years.Prevalence..Rounds.1.30.only.,
+         `50` = Rate......Anti.N..50.64.Years.Prevalence..Rounds.1.30.only.,
+         `65` = Rate......Anti.N..65..Years.Prevalence..Rounds.1.30.only.) %>%
+  select(date, `0`, `18`, `50`, `65`) %>% 
+  drop_na() %>%
+  pivot_longer(cols=-date, names_to="age_group_min", values_to="prevelance") %>%
+  mutate(age_group_min=as.numeric(age_group_min),
+         prevelance=prevelance/100) %>%
+  filter(prevelance<=1)
+prop_infected_age_group_mins <- unique(NJ_seroprevelance_by_age_raw$age_group_min)
+# assuming the distribution of seroprevelance across different age groups is constant (which is close to true)
+# so we take the mean over time of the fraction of seroprevelance for each age group
+NJ_seroprevelance_by_age <-
+  NJ_seroprevelance_by_age_raw %>%
+  left_join(group_census_data(prop_infected_age_group_mins)) %>%
+  mutate(num_infected=prevelance*pop) %>%
+  group_by(date) %>%
+  reframe(age_group_min=age_group_min,
+          num_infected=num_infected,
+          pop=pop,
+          frac_of_infecteds=num_infected/sum(num_infected)) %>%
+  group_by(age_group_min) %>%
+  summarise(frac_of_infecteds=mean(frac_of_infecteds),
+            pop=first(pop)) %>%
+  ungroup()
+
+### New vaccinations per week in NJ, data from NJDOH
 num_vaccinations_by_age <-
   read.csv("data/vaccinations_by_age.csv") %>%
   pivot_longer(cols=-age_cat, names_to="test_week", values_to="new_vaccinations") %>%
   mutate(test_week=test_week %>% str_remove("X") %>% str_split("_") %>% lapply(as.numeric) %>% get_test_week_from_epiweek,
          age_group_min=to_age_group_min(age_cat)) %>% 
   group_by(test_week) %>%
-  summarise(age_group_min=age_group_min,
-            new_vaccinations=new_vaccinations,
-            week_total=sum(new_vaccinations)) %>%
-  ungroup() %>%
+  reframe(age_group_min=age_group_min,
+          new_vaccinations=new_vaccinations,
+          week_total=sum(new_vaccinations)) %>% 
   filter(!is.na(age_group_min)) %>% 
   group_by(test_week) %>%
-  summarise(age_group_min=age_group_min,
-            new_vaccinations=new_vaccinations/sum(new_vaccinations)*week_total)
+  reframe(age_group_min=age_group_min,
+          new_vaccinations=new_vaccinations/sum(new_vaccinations)*week_total)
 w_vac <- min(num_vaccinations_by_age$test_week)
 V <-
   c(rep(0, w_vac-1),
@@ -218,10 +244,10 @@ prop_vaccinated_by_age <-
   num_vaccinations_by_age %>%
   left_join(prop_vaccinated_census_data, by="age_group_min") %>%
   group_by(age_group_min) %>%
-  summarise(test_week=test_week,
-            prop_vaccinated=cumsum(new_vaccinations)/pop,
-            prop_vaccinated_max=min(max(prop_vaccinated), prop_vaccinated_cap),
-            prop_vaccinated=prop_vaccinated/max(prop_vaccinated,1/N)*prop_vaccinated_max) %>%
+  reframe(test_week=test_week,
+          prop_vaccinated=cumsum(new_vaccinations)/pop,
+          prop_vaccinated_max=min(max(prop_vaccinated), prop_vaccinated_cap),
+          prop_vaccinated=prop_vaccinated/max(prop_vaccinated,1/N)*prop_vaccinated_max) %>%
   select(test_week, age_group_min, prop_vaccinated)
 
 

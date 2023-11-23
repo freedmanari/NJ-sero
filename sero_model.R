@@ -7,7 +7,7 @@ set.seed(68)
 
 ### function from simulated weekly incidence to proportion of age groups infected over time 
 
-#https://covid.cdc.gov/covid-data-tracker/#demographicsovertime
+# https://covid.cdc.gov/covid-data-tracker/#demographicsovertime
 prop_infected_census_data <- group_census_data(prop_infected_age_group_mins)
 
 NJ_incidence_by_age <- read.csv("data/NJ_incidence_by_age.csv")
@@ -15,28 +15,10 @@ NJ_incidence_by_age <- read.csv("data/NJ_incidence_by_age.csv")
 prop_infected_cap <- prop_vaccinated_cap
 
 prop_infected_by_age <-
-  function(I) NJ_incidence_by_age %>% 
-  pivot_longer(cols=-date_end, names_to="age_group_min", values_to="incidence") %>% 
-  mutate(test_week=get_test_week(date_end),
-         age_group_min=to_age_group_min(age_group_min)) %>% 
-  left_join(prop_infected_census_data, by="age_group_min") %>%
-  mutate(new_infections=incidence/1e5*pop) %>% 
-  group_by(test_week) %>% 
-  summarise(age_group_min=age_group_min,
-            prop_of_new_infections=new_infections/sum(new_infections)) %>%
-  ungroup() %>%
-  group_by(age_group_min) %>% 
-  summarise(test_week=test_week,
-            num_infected=cumsum(prop_of_new_infections * I)) %>%
-  ungroup() %>%
-  left_join(prop_infected_census_data) %>%
-  group_by(age_group_min) %>% 
-  summarise(test_week=test_week,
-            prop_infected=num_infected/pop,
-            prop_infected_max=min(max(prop_infected), prop_infected_cap),
-            prop_infected=prop_infected/max(prop_infected,1/N)*prop_infected_max) %>%
-  ungroup() %>% 
-  select(test_week, age_group_min, prop_infected)
+  function(I) NJ_seroprevelance_by_age %>% 
+  group_by(age_group_min) %>%
+  reframe(test_week=1:W,
+          prop_infected=cumsum(I_best)*frac_of_infecteds/pop)
 
 
 
@@ -46,15 +28,14 @@ prop_infected_by_age <-
 interval_mins <- c(1:5)
 interval_weights <- matrix(0, length(interval_mins), W)
 
-interval_probs <- 
+interval_probs <-
   expand.grid(delay_int=sort(unique(model_sero_prev_PCR$delay_int[model_sero_prev_PCR$delay>=0])),
               interval=1:length(interval_mins)) %>% 
   left_join(model_sero_prev_PCR %>%
             mutate(interval=findInterval(y_data, interval_mins)) %>% 
             group_by(delay_int) %>%
-            summarise(interval=interval,
-                       p=1/n()) %>% 
-            ungroup() %>% 
+            reframe(interval=interval,
+                    p=1/n()) %>% 
             group_by(delay_int,interval) %>%
             summarise(p=sum(p)) %>%
             ungroup()) %>%
@@ -85,28 +66,27 @@ for (i in 1:length(interval_mins)) {
 ## calculate the backwards delay distributions from tests with past PCR positive
 
 
-# with access to sero_data.csv
+# with access to sero_tests.csv
 
 # delay_dists <-
 #   all_sero %>%
-#   filter(prev_PCR) %>% 
-#   count(test_week, delay_int) %>% 
-#   group_by(test_week) %>% 
-#   summarise(delay_int=delay_int,
-#             n=n,
-#             p=n/sum(n)) %>%
-#   ungroup() %>% 
-#   pivot_wider(id_cols=c(test_week,delay_int),
+#   filter(prev_PCR) %>%
+#   count(test_week, delay_int) %>%
+#   group_by(test_week) %>%
+#   reframe(delay_int=delay_int,
+#           n=n,
+#           p=n/sum(n)) %>%
+#   pivot_wider(id_cols=test_week,
 #               names_from=delay_int,
 #               values_from=p,
-#               values_fill=0) %>% 
+#               values_fill=0) %>%
 #   select(-test_week)
 # delay_dists <- cbind(delay_dists,matrix(0,nrow(delay_dists),W-ncol(delay_dists)))
 # delay_dists <- rbind(do.call(rbind,lapply(1:(W-nrow(delay_dists)), function(i) c(rep(1/i,i),rep(0,W-i)))), as.matrix(delay_dists))
 # colnames(delay_dists) <- 0:(W-1)
 
 
-# without access to sero_data.csv
+# without access to sero_tests.csv
 
 delay_dists <- as.matrix(read.csv("data/delay_dists.csv"))
 colnames(delay_dists) <- 0:(W-1)
@@ -168,8 +148,8 @@ for (r in 1:sero_model_reps) {
                                                     V=model_sero_prev_PCR$prop_vaccinated,
                                                     prop_prev_PCR=
                                                       model_sero %>%
-                                                      count(test_month, prev_PCR) %>% 
-                                                      pivot_wider(id_cols=-n,names_from=prev_PCR,values_from=n) %>%
+                                                      count(test_month, prev_PCR) %>%
+                                                      pivot_wider(id_cols=test_month, names_from=prev_PCR, values_from=n) %>%
                                                       mutate(prop_prev_PCR=`TRUE`/(`TRUE`+`FALSE`)) %>%
                                                       pull(prop_prev_PCR),
                                                     r_SV=r_SV),
@@ -205,14 +185,16 @@ for (r in 1:sero_model_reps) {
                                            V2=model_sero_no_prev_PCR$prop_vaccinated,
                                            I=model_sero_no_prev_PCR$prop_infected,
                                            result=1*(model_sero_no_prev_PCR$result=="P"),
-                                           prop_prev_PCR=model_sero %>%
-                                             count(test_month, prev_PCR) %>% 
-                                             pivot_wider(id_cols=-n,names_from=prev_PCR,values_from=n) %>%
+                                           prop_prev_PCR=
+                                             model_sero %>%
+                                             count(test_month, prev_PCR) %>%
+                                             pivot_wider(id_cols=test_month, names_from=prev_PCR, values_from=n) %>%
                                              mutate(prop_prev_PCR=`TRUE`/(`TRUE`+`FALSE`)) %>%
                                              pull(prop_prev_PCR),
-                                           D2_prop_pos=model_sero_no_prev_PCR %>%
+                                           D2_prop_pos=
+                                             model_sero_no_prev_PCR %>%
                                              count(test_month, result) %>%
-                                             pivot_wider(id_cols=-n,names_from="result", values_from=n) %>%
+                                             pivot_wider(id_cols=test_month, names_from=result, values_from=n) %>%
                                              mutate(prop_pos=P/(N+P)) %>%
                                              pull(prop_pos),
                                            kS=nrow(filter(model_sero_prev_PCR, test_week<w_vac, result=="N")) /
@@ -287,8 +269,8 @@ for (r in 1:sero_model_reps) {
                                                  V=model_sero_prev_PCR$prop_vaccinated,
                                                  prop_prev_PCR=
                                                    model_sero %>%
-                                                   count(test_month, prev_PCR) %>% 
-                                                   pivot_wider(id_cols=-n,names_from=prev_PCR,values_from=n) %>%
+                                                   count(test_month, prev_PCR) %>%
+                                                   pivot_wider(id_cols=test_month, names_from=prev_PCR, values_from=n) %>%
                                                    mutate(prop_prev_PCR=`TRUE`/(`TRUE`+`FALSE`)) %>%
                                                    pull(prop_prev_PCR),
                                                  r_SV=r_SV),
@@ -324,14 +306,16 @@ for (r in 1:sero_model_reps) {
                                         V2=model_sero_no_prev_PCR$prop_vaccinated,
                                         I=model_sero_no_prev_PCR$prop_infected,
                                         result=1*(model_sero_no_prev_PCR$result=="P"),
-                                        prop_prev_PCR=model_sero %>%
-                                          count(test_month, prev_PCR) %>% 
-                                          pivot_wider(id_cols=-n,names_from=prev_PCR,values_from=n) %>%
+                                        prop_prev_PCR=
+                                          model_sero %>%
+                                          count(test_month, prev_PCR) %>%
+                                          pivot_wider(id_cols=test_month, names_from=prev_PCR, values_from=n) %>%
                                           mutate(prop_prev_PCR=`TRUE`/(`TRUE`+`FALSE`)) %>%
                                           pull(prop_prev_PCR),
-                                        D2_prop_pos=model_sero_no_prev_PCR %>%
+                                        D2_prop_pos=
+                                          model_sero_no_prev_PCR %>%
                                           count(test_month, result) %>%
-                                          pivot_wider(id_cols=-n,names_from="result", values_from=n) %>%
+                                          pivot_wider(id_cols=test_month, names_from=result, values_from=n) %>%
                                           mutate(prop_pos=P/(N+P)) %>%
                                           pull(prop_pos),
                                         kS=nrow(filter(model_sero_prev_PCR, test_week<w_vac, result=="N")) /
@@ -395,8 +379,8 @@ for (r in 1:sero_model_reps) {
                                                   V=model_sero_prev_PCR$prop_vaccinated,
                                                   prop_prev_PCR=
                                                     model_sero %>%
-                                                    count(test_month, prev_PCR) %>% 
-                                                    pivot_wider(id_cols=-n,names_from=prev_PCR,values_from=n) %>%
+                                                    count(test_month, prev_PCR) %>%
+                                                    pivot_wider(id_cols=test_month, names_from=prev_PCR, values_from=n) %>%
                                                     mutate(prop_prev_PCR=`TRUE`/(`TRUE`+`FALSE`)) %>%
                                                     pull(prop_prev_PCR),
                                                   r_SV=r_SV),
@@ -432,14 +416,16 @@ for (r in 1:sero_model_reps) {
                                          V2=model_sero_no_prev_PCR$prop_vaccinated,
                                          I=model_sero_no_prev_PCR$prop_infected,
                                          result=1*(model_sero_no_prev_PCR$result=="P"),
-                                         prop_prev_PCR=model_sero %>%
-                                           count(test_month, prev_PCR) %>% 
-                                           pivot_wider(id_cols=-n,names_from=prev_PCR,values_from=n) %>%
+                                         prop_prev_PCR=
+                                           model_sero %>%
+                                           count(test_month, prev_PCR) %>%
+                                           pivot_wider(id_cols=test_month, names_from=prev_PCR, values_from=n) %>%
                                            mutate(prop_prev_PCR=`TRUE`/(`TRUE`+`FALSE`)) %>%
                                            pull(prop_prev_PCR),
-                                         D2_prop_pos=model_sero_no_prev_PCR %>%
+                                         D2_prop_pos=
+                                           model_sero_no_prev_PCR %>%
                                            count(test_month, result) %>%
-                                           pivot_wider(id_cols=-n,names_from="result", values_from=n) %>%
+                                           pivot_wider(id_cols=test_month, names_from=result, values_from=n) %>%
                                            mutate(prop_pos=P/(N+P)) %>%
                                            pull(prop_pos),
                                          kS=nrow(filter(model_sero_prev_PCR, test_week<w_vac, result=="N")) /

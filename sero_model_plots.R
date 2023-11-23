@@ -7,6 +7,7 @@ require(ggtext)
 require(stringr)
 require(scales)
 require(bayestestR)
+require(colorspace)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # for saving the results of the sero model simulations
@@ -110,7 +111,7 @@ model_sero %>%
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
         axis.text.x = element_text(angle = 90),
-        axis.line = element_line(colour = "black", size=.3),
+        axis.line = element_line(colour = "black", linewidth=.3),
         axis.line.y.right = element_line(color = "blue"), 
         axis.ticks.y.right = element_line(color = "blue"),
         axis.text.y.right = element_text(color="blue"),
@@ -140,7 +141,7 @@ model_sero %>%
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
         axis.text.x = element_text(angle = 90),
-        axis.line = element_line(colour = "black", size=.3),
+        axis.line = element_line(colour = "black", linewidth=.3),
         legend.position = c(.8,.18),
         legend.title=element_text(size=9)) +
   geom_vline(xintercept=get_week_start_from_test_week(w_vac), color="red", lty="dashed")
@@ -191,7 +192,7 @@ y_pred_age_data <-
                names_prefix="^[^_]*_",
                values_to="y_pred") %>%
   cbind(type=c("mean","low","high")) %>%
-  pivot_wider(id_cols=-y_pred,
+  pivot_wider(id_cols=c(delay_int, age_group),
               names_from=type,
               values_from=y_pred)
 
@@ -205,14 +206,14 @@ model_sero_prev_PCR %>%
   geom_ribbon(data=filter(y_pred_age_data,age_group=="total"), aes(delay_int,ymin=low,ymax=high), fill="grey", alpha=.3) +
   geom_line(data=filter(y_pred_age_data,age_group=="total"), aes(delay_int,y=mean), col="red") +
   geom_point(aes(delay_int,y)) +
-  geom_hline(aes(yintercept=filter(y_pred_age_data,age_group=="total",delay_int==0)$mean),size=.3) +
+  geom_hline(aes(yintercept=filter(y_pred_age_data,age_group=="total",delay_int==0)$mean),linewidth=.3) +
   xlab("delay from PCR positive to serology test (weeks)") +
   ylab("mean log titer value") +
   scale_x_continuous(expand=expansion(c(0,0)), breaks=c(0,20,160/7,40,60), labels=c(0,20,"x",40,60)) +
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
-        axis.line=element_line(color="black",size=.3))
+        axis.line=element_line(color="black",linewidth=.3))
 
 
 
@@ -242,7 +243,7 @@ model_sero_prev_PCR %>%
   theme(panel.grid=element_blank(),
         panel.background=element_blank(),
         panel.border=element_blank(),
-        axis.line=element_line(size=.3),
+        axis.line=element_line(linewidth=.3),
         plot.margin = margin(t = 5, r = 5, b = 10, l = 5, unit = "pt"))
 
 
@@ -272,7 +273,7 @@ for (i in 1:length(interval_mins)) {
     theme(panel.background=element_blank(),
           panel.border=element_blank(),
           panel.grid=element_blank(),
-          axis.line=element_line(size=.3),
+          axis.line=element_line(linewidth=.3),
           plot.title = element_text(hjust = 0.5)))
 }
 
@@ -297,7 +298,7 @@ model_sero %>%
   ungroup() %>% 
   mutate(date=as.Date(sapply(year, function(d) paste(floor(d-1/12),"-",round((d-floor(d-1/12))*12), "-1",sep=""))) + ifelse(prev_PCR=="yes",-2.5,2.5)) %>% 
   ggplot() +
-  geom_line(aes(date,y,group=interaction(prev_PCR,y_type),color=prev_PCR,linetype=as.factor(y_type))) +
+  geom_line(aes(date,y,group=interaction(prev_PCR,y_type),color=prev_PCR,linetype=factor(y_type))) +
   geom_errorbar(aes(date,ymin=lwr,ymax=upr,group=interaction(prev_PCR,y_type),color=prev_PCR,alpha=ifelse(y_type=="y_data",1,0))) +
   ylab("mean log titer value") +
   xlab("test date") +
@@ -311,7 +312,7 @@ model_sero %>%
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
         axis.text.x = element_text(angle = 90),
-        axis.line = element_line(colour = "black", size=.3),
+        axis.line = element_line(colour = "black", linewidth=.3),
         legend.title = element_text(size=9),
         legend.text = element_text(size=8),
         plot.title=element_text(hjust = 0.5)) +
@@ -375,7 +376,7 @@ stan_preds_prev_PCR %>%
   geom_errorbar(data=y_data_prev_PCR, aes(x=date,ymin=lwr, ymax=upr), color=hue_pal()(2)[1], width=8) +
   geom_point(data=y_data_prev_PCR, aes(x=date,y=y), color=hue_pal()(2)[1]) +
   geom_vline(xintercept=get_week_start_from_test_week(w_vac), color="red", lty="dashed") +
-  geom_line(aes(date,y,color=as.factor(r),group=r),alpha=.3) +
+  geom_line(aes(date,y,color=factor(r),group=r),alpha=.3) +
   ylab("mean log titer value") +
   xlab("test date") +
   scale_x_date(date_labels="%b '%y",date_breaks="1 month") +
@@ -385,7 +386,7 @@ stan_preds_prev_PCR %>%
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
         axis.text.x = element_text(angle = 90),
-        axis.line = element_line(colour = "black", size=.3),
+        axis.line = element_line(colour = "black", linewidth=.3),
         legend.position="none",
         plot.title=element_text(hjust = 0.5))
   
@@ -397,7 +398,7 @@ stan_preds_no_prev_PCR %>%
   geom_point(data=y_data_no_prev_PCR, aes(x=date,y=y), color=hue_pal()(2)[2]) +
   geom_errorbar(data=y_data_no_prev_PCR, aes(x=date,ymin=lwr, ymax=upr), color=hue_pal()(2)[2], width=8) +
   geom_vline(xintercept=get_week_start_from_test_week(w_vac), color="red", lty="dashed") +
-  geom_line(aes(date,y,color=as.factor(r),group=r),alpha=.3) +
+  geom_line(aes(date,y,color=factor(r),group=r),alpha=.3) +
   ylab("mean log titer value") +
   xlab("test date") +
   scale_x_date(date_labels="%b '%y",date_breaks="1 month") +
@@ -407,7 +408,7 @@ stan_preds_no_prev_PCR %>%
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
         axis.text.x = element_text(angle = 90),
-        axis.line = element_line(colour = "black", size=.3),
+        axis.line = element_line(colour = "black", linewidth=.3),
         legend.position="none",
         plot.title=element_text(hjust = 0.5))
 
@@ -425,7 +426,7 @@ for (r in 1:sero_model_reps) {
 r_VPs <- r_VPs %>% mutate(date=get_week_start_from_test_week(x))
 
 ggplot(r_VPs) +
-  geom_line(aes(date,y,color=as.factor(r),group=r),alpha=.4) +
+  geom_line(aes(date,y,color=factor(r),group=r),alpha=.4) +
   ylab(expression(paste(italic(r[VP]),"(",italic(w),")"))) +
   scale_x_date(name="test date",date_labels="%b '%y",date_breaks="1 month") +
   scale_y_continuous(name=bquote(italic(r)[italic(VP)](italic(w))),
@@ -436,7 +437,7 @@ ggplot(r_VPs) +
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
-        axis.line=element_line(size=.3),
+        axis.line=element_line(linewidth=.3),
         legend.position="none",
         axis.text.x=element_text(angle = 90),
         plot.margin=margin(5,10,5,5),
@@ -446,7 +447,7 @@ ggplot(r_VPs) +
 
 # other important parameters, for supplement
 
-p1 <- data.frame(rep=as.factor(1:sero_model_reps),
+p1 <- data.frame(rep=factor(1:sero_model_reps),
                  I_total=sapply(I_indices, function(i) sum(unlist(lapply(Is, function(w) w[i]))))) %>%
   pivot_longer(cols=-rep, names_to="parameter", values_to="value") %>% 
   ggplot() +
@@ -459,7 +460,7 @@ p1 <- data.frame(rep=as.factor(1:sero_model_reps),
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
-        axis.line=element_line(size=.3),
+        axis.line=element_line(linewidth=.3),
         legend.position="none",
         axis.text.x=element_markdown())
 
@@ -467,7 +468,7 @@ p2 <- sero_model_summs %>%
   lapply(function(s) s[c("sigma","psi","r_SI","r_VP_init","r_VP_end")]) %>%
   do.call(what=rbind) %>%
   as.data.frame() %>% 
-  cbind(rep=as.factor(1:sero_model_reps)) %>% 
+  cbind(rep=factor(1:sero_model_reps)) %>% 
   pivot_longer(cols=-rep, names_to="parameter", values_to="value") %>%
   mutate(parameter=factor(parameter, levels=c("sigma","psi","r_SI","r_VP_init","r_VP_end"))) %>% 
   ggplot() +
@@ -481,12 +482,12 @@ p2 <- sero_model_summs %>%
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
-        axis.line=element_line(size=.3),
+        axis.line=element_line(linewidth=.3),
         legend.position="none",
         axis.title.y=element_blank(),
         axis.text.x=element_markdown())
 
-p3 <- data.frame(rep=as.factor(1:sero_model_reps),
+p3 <- data.frame(rep=factor(1:sero_model_reps),
                  r_VP_switch=get_week_start_from_test_week(unlist(lapply(sero_model_summs, function(s) s["r_VP_switch"])))) %>% 
   pivot_longer(cols=-rep, names_to="parameter", values_to="value") %>% 
   ggplot() +
@@ -502,7 +503,7 @@ p3 <- data.frame(rep=as.factor(1:sero_model_reps),
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
-        axis.line=element_line(size=.3),
+        axis.line=element_line(linewidth=.3),
         legend.position="none",
         axis.title.y=element_blank(),
         axis.text.x=element_markdown())
@@ -547,7 +548,7 @@ model_sero %>%
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
-        axis.line=element_line(size=.3),
+        axis.line=element_line(linewidth=.3),
         axis.text.x = element_text(angle = 90),
         plot.title=element_text(hjust=.5))
 
@@ -561,8 +562,8 @@ model_sero %>%
 prop_vaccinated_by_age %>%
   ggplot() +
   geom_line(aes(get_week_start_from_test_week(test_week),
-                prop_vaccinated,group=age_group_min,col=as.factor(age_group_min)),
-            size=.8) +
+                prop_vaccinated,group=age_group_min,col=factor(age_group_min)),
+            linewidth=.8) +
   scale_x_date(name="date",date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,0))) +
   scale_y_continuous(name="proportion vaccinated",limits=c(0,1),expand=expansion(c(.003,0))) +
   scale_color_discrete(name="age group",
@@ -571,28 +572,72 @@ prop_vaccinated_by_age %>%
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
-        axis.line=element_line(size=.3),
+        axis.line=element_line(linewidth=.3),
         axis.text.x = element_text(angle = 90))
 
 
 
 ## proportions of people who have ever been infected by infection age groups, used in serology model
 
-# using the mean estimate for I
+# using the mean estimate for I (I_best) and
+# assuming infections are at all times split equally between different age groups
+# (see next two plots for justification of this)
 prop_infected_by_age(I_best) %>%
   ggplot() +
   geom_line(aes(get_week_start_from_test_week(test_week),
-                prop_infected,group=age_group_min,col=as.factor(age_group_min)),
-            size=.8) +
+                prop_infected,group=age_group_min,col=factor(age_group_min)),
+            linewidth=.8) +
   scale_x_date(name="date",date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,0))) +
-  scale_y_continuous(name="cumulative proportion infected",limits=c(0,1),expand=expansion(c(.003,0))) +
+  scale_y_continuous(name="estimated cumulative proportion infected in NJ",limits=c(0,1),expand=expansion(c(.003,0))) +
   scale_color_discrete(name="age group",
                        labels=c("0-4","5-11","12-15","16-17","18-29","30-39","40-49","50-64","65-74","75+")) +
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
-        axis.line=element_line(size=.3),
+        axis.line=element_line(linewidth=.3),
         axis.text.x = element_text(angle = 90))
+
+
+
+# measured NJ seroprevelance by age
+NJ_seroprevelance_by_age_raw %>%
+  ggplot() +
+  geom_line(aes(date, prevelance, col=factor(age_group_min)),
+            linewidth=.8) +
+  scale_x_date(name="date",date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,0))) +
+  scale_y_continuous(name="measured seroprevalence in NJ",limits=c(0,1),expand=expansion(c(0,0))) +
+  scale_color_discrete(name="age group",
+                       labels=c("0-17","18-49","50-64","65+")) +
+  theme_bw() +
+  theme(panel.grid=element_blank(),
+        panel.border=element_blank(),
+        axis.line=element_line(linewidth=.3),
+        axis.text.x = element_text(angle = 90))
+
+# NJ seroprevelance distributions between different age groups over time
+# Because it these are relatively constant, we average these proportions for estimating
+# cumulative infections per age group
+NJ_seroprevelance_by_age_raw %>%
+  left_join(group_census_data(prop_infected_age_group_mins)) %>%
+  mutate(num_infected=prevelance*pop) %>%
+  group_by(date) %>%
+  reframe(age_group_min=age_group_min,
+          num_infected=num_infected,
+          pop=pop,
+          frac_of_infecteds=num_infected/sum(num_infected)) %>%
+  ggplot() +
+  geom_bar(aes(date, frac_of_infecteds, fill=factor(age_group_min)),
+           col="black", linewidth=.1, stat="identity", width=16) +
+  scale_x_date(name="date",date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(.02,.02))) +
+  scale_y_continuous(name="measured seroprevelance age distributions in NJ",limits=c(0,1),expand=expansion(c(0,.001))) +
+  scale_fill_discrete(name="age group",
+                      labels=c("0-17","18-49","50-64","65+")) +
+  theme_bw() +
+  theme(panel.grid=element_blank(),
+        panel.border=element_blank(),
+        axis.line=element_line(linewidth=.3),
+        axis.text.x = element_text(angle = 90))
+
 
 
 
@@ -603,7 +648,7 @@ model_sero %>%
            month=floor_date(min_date %m+% months(test_month-1), "month")) %>%
   summarise(prop_prev_PCR = sum(prev_PCR) / n()) %>%
   ggplot() +
-  geom_line(aes(month, prop_prev_PCR, group=age_group, col=age_group),size=.7) +
+  geom_line(aes(month, prop_prev_PCR, col=age_group),linewidth=.7) +
   scale_color_manual(name="age group", values=c("limegreen","brown2")) +
   theme_classic() +
   scale_x_date(date_labels="%b '%y",date_breaks="1 month") +
