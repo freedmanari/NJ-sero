@@ -43,7 +43,7 @@ parameters {
   real<lower=0> r_SI;
   real<lower=0> r_VP_init;
   real<lower=0> r_VP_end;
-  real<lower=w_vac,upper=W> r_VP_switch;
+  real<lower=w_vac,upper=W> w_switch;
   real<lower=0> psi;
 
   real<lower=0> sigma;
@@ -85,10 +85,10 @@ transformed parameters {
   array[D2] real vac_pred2;
   
   for (i in 1:D1) {
-    if (w1[i] <= r_VP_switch) {
+    if (w1[i] <= w_switch) {
       r_VP = r_VP_init;
     } else {
-      r_VP = r_VP_init + (w1[i]-r_VP_switch)/(W-r_VP_switch)*(r_VP_end-r_VP_init);
+      r_VP = r_VP_init + (w1[i]-w_switch)/(W-w_switch)*(r_VP_end-r_VP_init);
     }
     
     PI_PpS=1;
@@ -106,10 +106,10 @@ transformed parameters {
     vac_pred1[i] = PV_PpS;
   }
   for (i in 1:D2) {
-    if (w2[i] <= r_VP_switch) {
+    if (w2[i] <= w_switch) {
       r_VP = r_VP_init;
     } else {
-      r_VP = r_VP_init + (w2[i]-r_VP_switch)/(W-r_VP_switch)*(r_VP_end-r_VP_init);
+      r_VP = r_VP_init + (w2[i]-w_switch)/(W-w_switch)*(r_VP_end-r_VP_init);
     }
     
     PI_PpS=1;
@@ -159,7 +159,7 @@ model {
   r_SI ~ gamma(3,3);
   r_VP_init ~ gamma(3,3);
   r_VP_end ~ gamma(3,3);
-  r_VP_switch ~ uniform(w_vac, W);
+  w_switch ~ uniform(w_vac, W);
   psi ~ exponential(2);
   
   sigma ~ exponential(1);

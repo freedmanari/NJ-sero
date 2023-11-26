@@ -25,7 +25,7 @@ parameters {
   
   real<lower=0> r_VP_init;
   real<lower=0> r_VP_end;
-  real<lower=w_vac,upper=W> r_VP_switch;
+  real<lower=w_vac,upper=W> w_switch;
   real<lower=0> psi;
   
   real<lower=0> sigma;
@@ -52,10 +52,10 @@ transformed parameters {
   array[W+1] real y_pred_age5;
   
   for (i in 1:D) {
-    if (w[i] <= r_VP_switch) {
+    if (w[i] <= w_switch) {
       r_VP = r_VP_init;
     } else {
-      r_VP = r_VP_init + (w[i]-r_VP_switch)/(W-r_VP_switch)*(r_VP_end-r_VP_init);
+      r_VP = r_VP_init + (w[i]-w_switch)/(W-w_switch)*(r_VP_end-r_VP_init);
     }
     
     PI_PpS = 1;
@@ -87,7 +87,7 @@ model {
   
   r_VP_init ~ gamma(3,3);
   r_VP_end ~ gamma(3,3);
-  r_VP_switch ~ uniform(w_vac, W);
+  w_switch ~ uniform(w_vac, W);
   psi ~ exponential(2);
   
   sigma ~ exponential(1);

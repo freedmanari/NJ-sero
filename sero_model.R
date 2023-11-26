@@ -15,7 +15,7 @@ NJ_incidence_by_age <- read.csv("data/NJ_incidence_by_age.csv")
 prop_infected_cap <- prop_vaccinated_cap
 
 prop_infected_by_age <-
-  function(I) NJ_seroprevelance_by_age %>% 
+  function(I) NJ_seroprevalence_by_age %>% 
   group_by(age_group_min) %>%
   reframe(test_week=1:W,
           prop_infected=cumsum(I_best)*frac_of_infecteds/pop)

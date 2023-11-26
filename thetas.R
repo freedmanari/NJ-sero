@@ -182,7 +182,7 @@ prop_vaccinated_age_group_mins <-
 
 # seroprevalence data from
 # https://data.cdc.gov/Laboratory-Surveillance/Nationwide-Commercial-Laboratory-Seroprevalence-Su/d2tw-32xv
-NJ_seroprevelance_by_age_raw <-
+NJ_seroprevalence_by_age_raw <-
   read.csv("data/Nationwide_Commercial_Laboratory_Seroprevalence_Survey.csv") %>%
   filter(Site=="NJ") %>% 
   mutate(date = as.Date(str_remove(Date.Range.of.Specimen.Collection, "(.*)-( *)"), format="%b %d, %Y"),
@@ -192,17 +192,17 @@ NJ_seroprevelance_by_age_raw <-
          `65` = Rate......Anti.N..65..Years.Prevalence..Rounds.1.30.only.) %>%
   select(date, `0`, `18`, `50`, `65`) %>% 
   drop_na() %>%
-  pivot_longer(cols=-date, names_to="age_group_min", values_to="prevelance") %>%
+  pivot_longer(cols=-date, names_to="age_group_min", values_to="prevalence") %>%
   mutate(age_group_min=as.numeric(age_group_min),
-         prevelance=prevelance/100) %>%
-  filter(prevelance<=1)
-prop_infected_age_group_mins <- unique(NJ_seroprevelance_by_age_raw$age_group_min)
-# assuming the distribution of seroprevelance across different age groups is constant (which is close to true)
-# so we take the mean over time of the fraction of seroprevelance for each age group
-NJ_seroprevelance_by_age <-
-  NJ_seroprevelance_by_age_raw %>%
+         prevalence=prevalence/100) %>%
+  filter(prevalence<=1)
+prop_infected_age_group_mins <- unique(NJ_seroprevalence_by_age_raw$age_group_min)
+# assuming the distribution of seroprevalence across different age groups is constant (which is close to true)
+# so we take the mean over time of the fraction of seroprevalence for each age group
+NJ_seroprevalence_by_age <-
+  NJ_seroprevalence_by_age_raw %>%
   left_join(group_census_data(prop_infected_age_group_mins)) %>%
-  mutate(num_infected=prevelance*pop) %>%
+  mutate(num_infected=prevalence*pop) %>%
   group_by(date) %>%
   reframe(age_group_min=age_group_min,
           num_infected=num_infected,

@@ -421,7 +421,7 @@ stan_preds_no_prev_PCR %>%
 r_VPs <- data.frame(r=numeric(), x=numeric(), y=numeric())
 for (r in 1:sero_model_reps) {
   summ <- sero_model_summs[[r]]
-  r_VPs <- rbind(r_VPs, data.frame(r=r, x=c(w_vac,summ["r_VP_switch"],W), y=summ[c("r_VP_init","r_VP_init","r_VP_end")]))
+  r_VPs <- rbind(r_VPs, data.frame(r=r, x=c(w_vac,summ["w_switch"],W), y=summ[c("r_VP_init","r_VP_init","r_VP_end")]))
 }
 r_VPs <- r_VPs %>% mutate(date=get_week_start_from_test_week(x))
 
@@ -488,7 +488,7 @@ p2 <- sero_model_summs %>%
         axis.text.x=element_markdown())
 
 p3 <- data.frame(rep=factor(1:sero_model_reps),
-                 r_VP_switch=get_week_start_from_test_week(unlist(lapply(sero_model_summs, function(s) s["r_VP_switch"])))) %>% 
+                 w_switch=get_week_start_from_test_week(unlist(lapply(sero_model_summs, function(s) s["w_switch"])))) %>% 
   pivot_longer(cols=-rep, names_to="parameter", values_to="value") %>% 
   ggplot() +
   geom_point(aes(x=parameter,y=value,col=rep),position=position_jitter(w=0.1, h=0)) +
@@ -599,10 +599,10 @@ prop_infected_by_age(I_best) %>%
 
 
 
-# measured NJ seroprevelance by age
-NJ_seroprevelance_by_age_raw %>%
+# measured NJ seroprevalence by age
+NJ_seroprevalence_by_age_raw %>%
   ggplot() +
-  geom_line(aes(date, prevelance, col=factor(age_group_min)),
+  geom_line(aes(date, prevalence, col=factor(age_group_min)),
             linewidth=.8) +
   scale_x_date(name="date",date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,0))) +
   scale_y_continuous(name="measured seroprevalence in NJ",limits=c(0,1),expand=expansion(c(0,0))) +
@@ -614,12 +614,12 @@ NJ_seroprevelance_by_age_raw %>%
         axis.line=element_line(linewidth=.3),
         axis.text.x = element_text(angle = 90))
 
-# NJ seroprevelance distributions between different age groups over time
+# NJ seroprevalence distributions between different age groups over time
 # Because it these are relatively constant, we average these proportions for estimating
 # cumulative infections per age group
-NJ_seroprevelance_by_age_raw %>%
+NJ_seroprevalence_by_age_raw %>%
   left_join(group_census_data(prop_infected_age_group_mins)) %>%
-  mutate(num_infected=prevelance*pop) %>%
+  mutate(num_infected=prevalence*pop) %>%
   group_by(date) %>%
   reframe(age_group_min=age_group_min,
           num_infected=num_infected,
@@ -629,7 +629,7 @@ NJ_seroprevelance_by_age_raw %>%
   geom_bar(aes(date, frac_of_infecteds, fill=factor(age_group_min)),
            col="black", linewidth=.1, stat="identity", width=16) +
   scale_x_date(name="date",date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(.02,.02))) +
-  scale_y_continuous(name="measured seroprevelance age distributions in NJ",limits=c(0,1),expand=expansion(c(0,.001))) +
+  scale_y_continuous(name="measured seroprevalence age distributions in NJ",limits=c(0,1),expand=expansion(c(0,.001))) +
   scale_fill_discrete(name="age group",
                       labels=c("0-17","18-49","50-64","65+")) +
   theme_bw() +
