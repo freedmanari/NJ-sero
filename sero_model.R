@@ -10,16 +10,15 @@ set.seed(68)
 # https://covid.cdc.gov/covid-data-tracker/#demographicsovertime
 prop_infected_census_data <- group_census_data(prop_infected_age_group_mins)
 
-NJ_incidence_by_age <- read.csv("data/NJ_incidence_by_age.csv")
-
-prop_infected_cap <- prop_vaccinated_cap
+prop_infected_cap <- prop_vaccinated_cap #capping in case we get proportion of people infected over 1, though this is unlikely
 
 prop_infected_by_age <-
   function(I) NJ_seroprevalence_by_age %>% 
   group_by(age_group_min) %>%
-  reframe(test_week=1:W,
-          prop_infected=cumsum(I_best)*frac_of_infecteds/pop)
-
+  reframe(test_week = 1:W,
+          prop_infected = cumsum(I)*frac_of_infecteds/pop) %>%
+  mutate(prop_infected = prop_infected / max(prop_infected) *
+                         min(max(prop_infected), prop_infected_cap))
 
 
 ## preliminaries for simulating delays for tests with no past PCR positive

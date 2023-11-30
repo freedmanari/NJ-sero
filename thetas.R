@@ -244,11 +244,10 @@ prop_vaccinated_by_age <-
   num_vaccinations_by_age %>%
   left_join(prop_vaccinated_census_data, by="age_group_min") %>%
   group_by(age_group_min) %>%
-  reframe(test_week=test_week,
-          prop_vaccinated=cumsum(new_vaccinations)/pop,
-          prop_vaccinated_max=min(max(prop_vaccinated), prop_vaccinated_cap),
-          prop_vaccinated=prop_vaccinated/max(prop_vaccinated,1/N)*prop_vaccinated_max) %>%
-  select(test_week, age_group_min, prop_vaccinated)
+  reframe(test_week = test_week,
+          prop_vaccinated = cumsum(new_vaccinations)/pop) %>%
+  mutate(prop_vaccinated = prop_vaccinated / max(prop_vaccinated) *
+                           min(max(prop_vaccinated), prop_vaccinated_cap))
 
 
 

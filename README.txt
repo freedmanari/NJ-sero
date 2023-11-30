@@ -24,9 +24,8 @@ Data from other sources:
 - co-est2021-alldata.csv: 2021 estimated NJ census data by county, from https://www.census.gov/data/tables/time-series/demo/popest/2020s-counties-total.html
 - sc-est2021-agesex-civ.csv: 2021 estimated NJ census data by age and sex, from https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-detail.html
 - owid-covid-data.csv: weekly CFR estimates from US, from https://ourworldindata.org/mortality-risk-covid
-- NJ_incidence_by_age.csv: weekly COVID-19 incidence in NJ per 100,000 by age group, from https://covid.cdc.gov/covid-data-tracker/#demographicsovertime
 - Provisional_COVID-19_Death_Counts_by_Week_Ending_Date_and_State.csv: weekly COVID-19 death counts by state, from https://data.cdc.gov/NCHS/Provisional-COVID-19-Death-Counts-by-Week-Ending-D/r8kw-7aab
-- Nationwide_Commercial_Laboratory_Seroprevalence_Survey.csv: biweekly estimates of seroprevalence by state and age group, from https://data.cdc.gov/Laboratory-Surveillance/Nationwide-Commercial-Laboratory-Seroprevalence-Su/d2tw-32xv
+- Nationwide_Commercial_Laboratory_Seroprevalence_Survey.csv: biweekly estimates of COVID-19 seroprevalence by state and age group, from https://data.cdc.gov/Laboratory-Surveillance/Nationwide-Commercial-Laboratory-Seroprevalence-Su/d2tw-32xv
 
 --------------------------
 
