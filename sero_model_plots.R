@@ -373,8 +373,8 @@ y_data_no_prev_PCR <-
 
 stan_preds_prev_PCR %>%
   ggplot() +
-  geom_errorbar(data=y_data_prev_PCR, aes(x=date,ymin=lwr, ymax=upr), color=hue_pal()(2)[1], width=8) +
-  geom_point(data=y_data_prev_PCR, aes(x=date,y=y), color=hue_pal()(2)[1]) +
+  geom_errorbar(data=y_data_prev_PCR, aes(x=date,ymin=lwr, ymax=upr), color=hue_pal()(2)[2], width=8) +
+  geom_point(data=y_data_prev_PCR, aes(x=date,y=y), color=hue_pal()(2)[2]) +
   geom_vline(xintercept=get_week_start_from_test_week(w_vac), color="red", lty="dashed") +
   geom_line(aes(date,y,color=factor(r),group=r),alpha=.3) +
   ylab("mean log titer value") +
@@ -395,8 +395,8 @@ stan_preds_prev_PCR %>%
 
 stan_preds_no_prev_PCR %>%
   ggplot() +
-  geom_point(data=y_data_no_prev_PCR, aes(x=date,y=y), color=hue_pal()(2)[2]) +
-  geom_errorbar(data=y_data_no_prev_PCR, aes(x=date,ymin=lwr, ymax=upr), color=hue_pal()(2)[2], width=8) +
+  geom_point(data=y_data_no_prev_PCR, aes(x=date,y=y), color=hue_pal()(2)[1]) +
+  geom_errorbar(data=y_data_no_prev_PCR, aes(x=date,ymin=lwr, ymax=upr), color=hue_pal()(2)[1], width=8) +
   geom_vline(xintercept=get_week_start_from_test_week(w_vac), color="red", lty="dashed") +
   geom_line(aes(date,y,color=factor(r),group=r),alpha=.3) +
   ylab("mean log titer value") +
@@ -478,7 +478,7 @@ p2 <- sero_model_summs %>%
                             "<i>r</i><sub><i>SI</i></sub>",
                             "<i>r</i><sub><i>VP</i>,init</sub>",
                             "<i>r</i><sub><i>VP</i>,end</sub>")) +
-  scale_y_continuous(limits=c(0,2),breaks=c(seq(0,2,.4))) +
+  scale_y_continuous(limits=c(0,2.6),breaks=c(seq(0,2.5,.5))) +
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
@@ -516,7 +516,7 @@ title <-
              fontface="bold")
 
 # uncomment the next two commented-out lines in order to save pdf with the special characters coming out right
-# quartz(type = "pdf", file = "parameter_fits.pdf", width=par()$fin[1], height=par()$fin[2])
+# quartz(type = "pdf", file = "figures/supplement/parameter_fits.pdf", width=par()$fin[1], height=par()$fin[2])
 plot_grid(title,pg,ncol=1,rel_heights=c(.1,1))
 # dev.off()
 
