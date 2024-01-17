@@ -390,31 +390,31 @@ while (r <= thetas_reps) {
   
   if (calculate_odds_ratios) {
     #entries for contingency table for theta_I_P
-    C11_I_P <- round(Pp + kP*I/(kP*I+N-I) * Pn) #X1
-    C12_I_P <- round(I - Pp - kP*I/(kP*I+N-I) * Pn) #I-X1
-    C21_I_P <- round((N-I)/(kP*I+N-I) * Pn) #P-X1
-    C22_I_P <- round(N-I - (N-I)/(kP*I+N-I) * Pn) #N-I-P+X1
+    C11_I_P <- round(Pp + kP*I/(kP*I+N-I) * Pn)
+    C12_I_P <- round(I - Pp - kP*I/(kP*I+N-I) * Pn)
+    C21_I_P <- round((N-I)/(kP*I+N-I) * Pn)
+    C22_I_P <- round(N-I - (N-I)/(kP*I+N-I) * Pn)
     
     #entries for contingency table for theta_I_S
-    J <- cumsum(I) + cumsum(V) - cumsum(I)*cumsum(V)/N #MAKE SURE TO CALCULATE V FIRST
-    J2 <- cumsum(I)*cumsum(V)/N #MAKE SURE TO CALCULATE V FIRST
-    J1 <- J - J2 #MAKE SURE TO CALCULATE V FIRST
-    C11_I_S <- round(Sp + (kS*J1+kS^2*J2)/(kS*J1+kS^2*J2+N-J) * Sn) #Sp
-    C12_I_S <- round(J - Sp - (kS*J1+kS^2*J2)/(kS*J1+kS^2*J2+N-J) * Sn) #cumsum(I)-Sp
-    C21_I_S <- round((N-J)/(kS*J1+kS^2*J2+N-J) * Sn) #Sn
-    C22_I_S <- round(N-J - (N-J)/(kS*J1+kS^2*J2+N-J) * Sn) #N-cumsum(I)-Sn
+    J <- cumsum(I) + cumsum(V) - cumsum(I)*cumsum(V)/N
+    J2 <- cumsum(I)*cumsum(V)/N
+    J1 <- J - J2
+    C11_I_S <- round(Sp + (kS*J1+kS^2*J2)/(kS*J1+kS^2*J2+N-J) * Sn)
+    C12_I_S <- round(J - Sp - (kS*J1+kS^2*J2)/(kS*J1+kS^2*J2+N-J) * Sn)
+    C21_I_S <- round((N-J)/(kS*J1+kS^2*J2+N-J) * Sn)
+    C22_I_S <- round(N-J - (N-J)/(kS*J1+kS^2*J2+N-J) * Sn)
     
     #entries for contingency table for theta_Pp_P
     C11_Pp_P <- P1
-    C12_Pp_P <- cumsum(Pp)-P1 #cumsum(X1)-P1
+    C12_Pp_P <- cumsum(Pp)-P1
     C21_Pp_P <- P2
-    C22_Pp_P <- N-cumsum(Pp)-P2 #N-cumsum(X1)-P2
+    C22_Pp_P <- N-cumsum(Pp)-P2
     
     #entries for contingency table for theta_Pp_S
     C11_Pp_S <- S1
-    C12_Pp_S <- cumsum(Pp)-S1 #cumsum(X1)-S1
+    C12_Pp_S <- cumsum(Pp)-S1
     C21_Pp_S <- S2
-    C22_Pp_S <- N-cumsum(Pp)-S2 #N-cumsum(X1)-S2
+    C22_Pp_S <- N-cumsum(Pp)-S2
     
     for (i in 1:W) {
       C_I_P <- matrix(c(C11_I_P[i],C21_I_P[i],C12_I_P[i],C22_I_P[i]),2)
@@ -471,6 +471,70 @@ while (r <= thetas_reps) {
 }
 
 
+# commented lines below are for calculating theta_Pp_Sp, plotted in the supplement,
+# can only be calculated with access to sero_tests.csv and all_sero
+
+# Sp1_temp <-
+#   all_sero %>%
+#   filter(result=="P", prev_PCR) %>%
+#   count(test_week) %>%
+#   complete(test_week=1:W, fill=list(n=0)) %>%
+#   pull(n)
+# Sp2_temp <-
+#   all_sero %>%
+#   filter(result=="P", !prev_PCR) %>%
+#   count(test_week) %>%
+#   complete(test_week=1:W, fill=list(n=0)) %>%
+#   pull(n)
+# Sp1 <- round(Sp1_temp * Sp / (Sp1_temp+Sp2_temp))
+# Sp2 <- round(Sp2_temp * Sp / (Sp1_temp+Sp2_temp))
+# 
+# Sp1_zeros <- Sp1
+# Sp1_zeros[is.na(Sp1_zeros)] <- 0
+# 
+# set.seed(12345)
+# theta_Pp_Sp <- vector(mode="list",length=W)
+# 
+# r <- 1
+# while (r <= thetas_reps) {
+#   if (show_progress & r %% (thetas_reps/100)==0) {
+#     print(r/(thetas_reps/100))
+#   }
+#   
+#   I <- unlist(lapply(Is, function(w) w[r]))
+#   
+#   if (calculate_odds_ratios) {
+#     #entries for contingency table for theta_Pp_Sp
+#     C11_Pp_Sp <- Sp1
+#     C12_Pp_Sp <- cumsum(Pp) - cumsum(Sp1_zeros)
+#     C21_Pp_Sp <- Sp2
+#     C22_Pp_Sp <- cumsum(I) - Sp - (cumsum(Pp)-cumsum(Sp1_zeros))
+#     
+#     for (i in 1:W) {
+#       C_Pp_Sp <- matrix(c(C11_Pp_Sp[i],C12_Pp_Sp[i],C21_Pp_Sp[i],C22_Pp_Sp[i]),2)
+#       
+#       if ((all(!is.na(C_Pp_Sp)) & all(C_Pp_Sp>0)) | length(theta_Pp_Sp[[i]])==0) {
+#         if (all(!is.na(C_Pp_Sp)) & all(C_Pp_Sp>0)) {
+#           f <- fisher.test(C_Pp_Sp, conf.level=conf)
+#           mean <- log(f$estimate)
+#           sd <- (log(f$conf.int[2])-log(f$conf.int[1]))/(2*qnorm((conf+1)/2))
+#           theta_Pp_Sp[[i]] <- c(theta_Pp_Sp[[i]], rnorm(1,mean,sd))
+#         }
+#       } else {
+#         r <- r-1
+#         
+#         theta_Pp_Sp <- lapply(theta_Pp_S, function(w) w[1:r])
+#         
+#         break
+#       }
+#     }
+#   }
+#   
+#   r <- r+1
+# }
+
+
+
 
 
 
@@ -481,6 +545,7 @@ while (r <= thetas_reps) {
 #      theta_I_S,
 #      theta_Pp_P,
 #      theta_Pp_S,
+#      theta_Pp_Sp,
 #      file="data/thetas_simulations.RData")
 
 # for loading the results of the infection curve and thetas simulations
@@ -515,7 +580,20 @@ if (calculate_odds_ratios) {
   theta_Pp_S_best <- theta_Pp_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, mean(w))) %>% unlist
   theta_Pp_S_lower <- theta_Pp_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1-conf)/2)+1])) %>% unlist
   theta_Pp_S_upper <- theta_Pp_S_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1+conf)/2)])) %>% unlist
+  
+  # only if theta_Pp_Sp was defined,
+  # either calculated with access to sero_tests.csv and all_sero, or loaded from thetas_simulations
+  
+  # theta_Pp_Sp_sorted <- lapply(theta_Pp_Sp, sort)
+  # theta_Pp_Sp_best <- theta_Pp_Sp_sorted %>% lapply(function(w) ifelse(is.null(w), NA, mean(w))) %>% unlist
+  # theta_Pp_Sp_lower <- theta_Pp_Sp_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1-conf)/2)+1])) %>% unlist
+  # theta_Pp_Sp_upper <- theta_Pp_Sp_sorted %>% lapply(function(w) ifelse(is.null(w), NA, w[round(thetas_reps*(1+conf)/2)])) %>% unlist
 }
+
+
+
+
+
 
 
 
