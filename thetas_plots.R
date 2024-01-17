@@ -61,18 +61,22 @@ plot_theta <- function(theta_best, theta_lower, theta_upper, zero_line=T, ylab="
 plot_theta(I_best, I_lower, I_upper, zero_line=F, ylab="weekly incidence")
 
 
+theta_plots_aligned <-
+  align_plots(
+    plot_theta(theta_I_P_best[1:(W-1)], theta_I_P_lower[1:(W-1)], theta_I_P_upper[1:(W-1)],
+               time_range=c(1,W-1)),
+    plot_theta(theta_I_S_best[1:(W-1)], theta_I_S_lower[1:(W-1)], theta_I_S_upper[1:(W-1)],
+               time_range=c(1,W-1)),
+    plot_theta(theta_Pp_P_best[1:(W-1)], theta_Pp_P_lower[1:(W-1)], theta_Pp_P_upper[1:(W-1)],
+               time_range=c(1,W-1)),
+    plot_theta(theta_Pp_S_best[1:(W-1)], theta_Pp_S_lower[1:(W-1)], theta_Pp_S_upper[1:(W-1)],
+               time_range=c(1,W-1)),
+    align="v")
+ggdraw(theta_plots_aligned[[1]])
+ggdraw(theta_plots_aligned[[2]])
+ggdraw(theta_plots_aligned[[3]])
+ggdraw(theta_plots_aligned[[4]])
 
-plot_theta(theta_I_P_best[1:(W-1)], theta_I_P_lower[1:(W-1)], theta_I_P_upper[1:(W-1)],
-           time_range=c(1,W-1))
-
-plot_theta(theta_I_S_best[1:(W-1)], theta_I_S_lower[1:(W-1)], theta_I_S_upper[1:(W-1)],
-           time_range=c(1,W-1))
-
-plot_theta(theta_Pp_P_best[1:(W-1)], theta_Pp_P_lower[1:(W-1)], theta_Pp_P_upper[1:(W-1)],
-           time_range=c(1,W-1))
-
-plot_theta(theta_Pp_S_best[1:(W-1)], theta_Pp_S_lower[1:(W-1)], theta_Pp_S_upper[1:(W-1)],
-           time_range=c(1,W-1))
 
 # only if theta_Pp_Sp was defined,
 # either calculated with access to sero_tests.csv and all_sero, or loaded from thetas_simulations
@@ -110,8 +114,7 @@ plot_correlation <- function(I, theta, time_range=c(1,W)) {
     theme_classic() +
     xlab("log weekly incidence") +
     ylab("log odds ratio") +
-    scale_color_date(name="week start",date_labels="%b '%y",date_breaks="4 month",
-                     limits=as.Date(c("2020-05-01","2021-9-21")))
+    scale_color_date(name="week start",date_labels="%b '%y",breaks=as.Date(c("2020-05-01","2020-09-01","2021-01-01","2021-05-01","2021-09-01")))
 }
 
 plot_correlation(I_best, theta_I_P_best, time_range=c(6,(W-1)))
@@ -134,4 +137,11 @@ plot_theta(IFR_mean*CFR/mean(CFR), IFR_lower*CFR/mean(CFR), IFR_upper*CFR/mean(C
 ## plot of underreporting multiplier
 plot_theta(I_best[4:(W-1)]/Pp[4:(W-1)], I_lower[4:(W-1)]/Pp[4:(W-1)], I_upper[4:(W-1)]/Pp[4:(W-1)],
            ylab="underreporting multiplier", zero_line=F, sci_labels=F, time_range=c(4,W-1))
+
+
+
+
+
+
+
 

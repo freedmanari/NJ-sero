@@ -75,15 +75,13 @@ X12_region <-
   pivot_longer(cols=-"test_week", names_to="county", values_to="delays") %>% 
   filter(delays!="nnn") %>%
   group_by(test_week, county) %>%
-  summarise(delay=as.numeric(str_split(delays, '_')[[1]])) %>%
-  ungroup() %>%
+  reframe(delay=as.numeric(str_split(delays, '_')[[1]])) %>%
   filter(delay>=0) %>% 
   group_by(county, date=get_week_start_from_test_week(test_week+delay)) %>%
-  summarise(X12=n()) %>%
-  ungroup() %>% 
+  reframe(X12=n()) %>%
   right_join(expand.grid(date=get_week_start_from_test_week(1:W),county=county_list)) %>% 
   replace_na(list(X12=0)) %>%
-  pivot_wider(id_cols=-X12, names_from="county", values_from=X12) %>%
+  pivot_wider(id_cols=date, names_from="county", values_from=X12) %>%
   arrange(date)
 X12_region <-
   data.frame(date=get_week_start_from_test_week(1:W),
@@ -165,7 +163,7 @@ p1 <- data.frame(date=rep(get_week_start_from_test_week(1:(W-1)),3),
 # heatmap of new PCR positives
 p2 <- X1_region %>% 
   group_by(region) %>%
-  summarise(date=date,X1=X1/max(X1)) %>% 
+  reframe(date=date,X1=X1/max(X1)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
   geom_tile(aes(x=date, y=region, fill=X1, color=X1), size=1) +
@@ -193,7 +191,7 @@ p2 <- X1_region %>%
 # heatmap of new seropositives
 p3 <- X2_region %>%
   group_by(region) %>%
-  summarise(date=date,X2=X2/max(X2)) %>% 
+  reframe(date=date,X2=X2/max(X2)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
   geom_tile(aes(x=date, y=region, fill=X2, color=X2), size=1) +
@@ -220,7 +218,7 @@ p3 <- X2_region %>%
 # heatmap of new seropositives with past PCR positive
 p4 <- X12_region %>%
   group_by(region) %>%
-  summarise(date=date,X12=X12/max(X12)) %>% 
+  reframe(date=date,X12=X12/max(X12)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
   geom_tile(aes(x=date, y=region, fill=X12, color=X12), size=1) +
@@ -289,11 +287,10 @@ rainbow_gradient <- c("white", rev(rainbow(7))[-(1:2)])
 prop_prev_pcr <-
   left_join(X2_region,X12_region) %>%
   group_by(date) %>%
-  summarise(X2=c(X2, sum(X2)),
+  reframe(X2=c(X2, sum(X2)),
             X12=c(X12, sum(X12)),
             region=factor(c(as.character(region),"total"),
                           levels=c("south","shore","central","north","total"))) %>%
-  ungroup() %>% 
   mutate(prop_prev_pcr=ifelse(X2==0, NA, X12/X2)) %>% 
   select(-c(X2,X12))
 
@@ -471,7 +468,7 @@ p1 <-
 p2 <- 
   P_region %>% 
   group_by(region) %>%
-  summarise(date=date,P=P/max(P)) %>% 
+  reframe(date=date,P=P/max(P)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
   geom_tile(aes(x=date, y=region, fill=P, color=P), size=1) +
@@ -500,7 +497,7 @@ p2 <-
 p3 <-
   S_region %>% 
   group_by(region) %>%
-  summarise(date=date,S=S/max(S)) %>% 
+  reframe(date=date,S=S/max(S)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
   geom_tile(aes(x=date, y=region, fill=S, color=S), size=1) +
@@ -535,11 +532,10 @@ plot_grid(p1, aligned[[1]], aligned[[2]], ncol=1, align="v", axis=c("lr"), rel_h
 prop_prev_pcr_all <-
   S_region %>% 
   group_by(date) %>%
-  summarise(S=c(S, sum(S)),
+  reframe(S=c(S, sum(S)),
             S1=c(S1, sum(S1)),
             region=factor(c(as.character(region),"total"),
                           levels=c("south","shore","central","north","total"))) %>%
-  ungroup() %>% 
   mutate(prop_prev_pcr=ifelse(S==0, NA, S1/S)) %>% 
   select(-c(S,S1))
 
@@ -560,6 +556,109 @@ prop_prev_pcr_all %>%
         axis.line.y=element_blank(),
         legend.title=element_text(size=10),
         legend.position="right")
+
+
+
+
+
+## test positivity summary plot (part b of summary plot but for test positivity)
+
+P_positivity_region <-
+  P_region %>%
+  right_join(X1_region) %>%
+  mutate(P_positivity=X1/P)
+S_positivity_region <-
+  S_region %>%
+  right_join(X2_region) %>%
+  mutate(S_positivity=X2/S)
+
+# line graph of test positivity for both types of test
+p1 <-
+  data.frame(date=get_week_start_from_test_week(1:(W-1)),
+             PCR=X1[1:(W-1)]/P[1:(W-1)],
+             serology=X2[1:(W-1)]/S[1:(W-1)]) %>%
+  pivot_longer(cols=-date, names_to="type", values_to="tests") %>% 
+  ggplot() +
+  geom_line(aes(x=date,y=tests,group=type,color=type),size=1) +
+  scale_x_date(date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,.01))) +
+  scale_y_continuous(name="test positivity",
+                     expand=expansion(c(.017,.03)),
+                     position="right") +
+  scale_color_manual(name="test type",values=c("red3","chartreuse4")) +
+  theme_bw() +
+  theme(panel.grid=element_blank(),
+        panel.border=element_blank(),
+        panel.background=element_blank(),
+        axis.line=element_line(size=.4),
+        axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        legend.position="none",
+        plot.margin = unit(c(2.5,5.5,-2.3,5.5), "pt"))
+
+# heatmap of PCR test positivity
+p2 <- 
+  P_positivity_region %>%
+  filter(date < get_week_start_from_test_week(W)) %>% 
+  ggplot() +
+  geom_tile(aes(x=date, y=region, fill=P_positivity, color=P_positivity), size=1) +
+  scale_fill_gradientn(colors = c("white","red3"),
+                       guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
+                       limits=c(0,1)) +
+  scale_color_gradientn(colors = c("white","red3"),
+                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
+                        limits=c(0,1)) +
+  scale_x_date(expand=c(0,0)) +
+  scale_y_discrete(expand=c(0,0)) +
+  ylab("") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.line.x=element_line(size=.3),
+        axis.line.y=element_blank(),
+        plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
+        legend.key.height = unit(11, "pt"),
+        legend.key.width = unit(14, "pt"),
+        legend.title = element_blank(),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(0,0,0,0),
+        legend.position="none")
+
+# heatmap of serology test positivity
+p3 <-
+  S_positivity_region %>%
+  filter(date < get_week_start_from_test_week(W)) %>% 
+  ggplot() +
+  geom_tile(aes(x=date, y=region, fill=S_positivity, color=S_positivity), size=1) +
+  scale_fill_gradientn(colors = c("white","chartreuse4"), na.value = "gray80",
+                       guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
+                       limits=c(0,1)) +
+  scale_color_gradientn(colors = c("white","chartreuse4"), na.value = "gray80",
+                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
+                        limits=c(0,1)) +
+  scale_x_date(date_labels="%b '%y", date_breaks="1 month", expand=c(0,0)) +
+  scale_y_discrete(expand=c(0,0)) +
+  ylab("region") +
+  theme(axis.text.x=element_text(angle=90),
+        axis.ticks.y=element_blank(),
+        axis.line.x=element_line(size=.4),
+        axis.line.y=element_blank(),
+        plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
+        legend.key.height = unit(11, "pt"),
+        legend.key.width = unit(14, "pt"),
+        legend.title = element_blank(),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(0,0,0,0),
+        legend.position="none")
+
+# complete test positivity summary plot
+aligned <- align_plots(p2, p3, align = "vh", axis=c("lrtb"))
+plot_grid(p1, aligned[[1]], aligned[[2]], ncol=1, align="v", axis=c("lr"), rel_heights=c(1,1,1))
+
+
+
+
 
 
 
