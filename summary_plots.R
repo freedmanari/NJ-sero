@@ -571,6 +571,9 @@ S_positivity_region <-
   S_region %>%
   right_join(X2_region) %>%
   mutate(S_positivity=X2/S)
+max_positivity_less_than_1 <- max(Filter(function(f) f<1,
+                                  c(P_positivity_region$P_positivity,S_positivity_region$S_positivity)))
+
 
 # line graph of test positivity for both types of test
 p1 <-
@@ -602,10 +605,10 @@ p2 <-
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
   geom_tile(aes(x=date, y=region, fill=P_positivity, color=P_positivity), size=1) +
-  scale_fill_gradientn(colors = c("white","red3"),
+  scale_fill_gradientn(colors = c("white","red3","black"), values=c(0,max_positivity_less_than_1,1),
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
                        limits=c(0,1)) +
-  scale_color_gradientn(colors = c("white","red3"),
+  scale_color_gradientn(colors = c("white","red3","black"), values=c(0,max_positivity_less_than_1,1),
                         guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
                         limits=c(0,1)) +
   scale_x_date(expand=c(0,0)) +
@@ -631,10 +634,10 @@ p3 <-
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
   geom_tile(aes(x=date, y=region, fill=S_positivity, color=S_positivity), size=1) +
-  scale_fill_gradientn(colors = c("white","chartreuse4"), na.value = "gray80",
+  scale_fill_gradientn(colors = c("white","chartreuse4","black"), values=c(0,max_positivity_less_than_1,1), na.value = "gray80",
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
                        limits=c(0,1)) +
-  scale_color_gradientn(colors = c("white","chartreuse4"), na.value = "gray80",
+  scale_color_gradientn(colors = c("white","chartreuse4","black"), values=c(0,max_positivity_less_than_1,1), na.value = "gray80",
                         guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
                         limits=c(0,1)) +
   scale_x_date(date_labels="%b '%y", date_breaks="1 month", expand=c(0,0)) +
@@ -655,6 +658,35 @@ p3 <-
 # complete test positivity summary plot
 aligned <- align_plots(p2, p3, align = "vh", axis=c("lrtb"))
 plot_grid(p1, aligned[[1]], aligned[[2]], ncol=1, align="v", axis=c("lr"), rel_heights=c(1,1,1))
+
+
+# to get grayscale bar
+
+# S_positivity_region %>%
+#   filter(date < get_week_start_from_test_week(W)) %>% 
+#   ggplot() +
+#   geom_tile(aes(x=date, y=region, fill=S_positivity, color=S_positivity), size=1) +
+#   scale_fill_gradientn(colors = c("white","gray25"), na.value = "gray80",
+#                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
+#                        limits=c(0,max_positivity_less_than_1)) +
+#   scale_color_gradientn(colors = c("white","gray25"), na.value = "gray80",
+#                         guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
+#                         limits=c(0,max_positivity_less_than_1)) +
+#   scale_x_date(date_labels="%b '%y", date_breaks="1 month", expand=c(0,0)) +
+#   scale_y_discrete(expand=c(0,0)) +
+#   ylab("region") +
+#   theme(axis.ticks.y=element_blank(),
+#         axis.text.x=element_text(angle = 90),
+#         axis.line.x=element_line(size=.3),
+#         axis.line.y=element_blank(),
+#         plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
+#         legend.key.height = unit(11, "pt"),
+#         legend.key.width = unit(14, "pt"),
+#         legend.title = element_blank(),
+#         legend.margin=margin(0,0,0,0),
+#         legend.box.margin=margin(0,0,0,0),
+#         legend.position="right")
+
 
 
 
