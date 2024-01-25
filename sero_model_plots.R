@@ -8,6 +8,7 @@ require(stringr)
 require(scales)
 require(bayestestR)
 require(colorspace)
+require(viridis)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # for saving the results of the sero model simulations
@@ -528,7 +529,6 @@ plot_grid(title,pg,ncol=1,rel_heights=c(.1,1))
 ## predicated vaccination probability by past PCR positive over time
 
 summ <- sero_model_summs[[sero_model_reps]]
-
 model_sero %>% 
   cbind(vac_pred=summ[grep("^vac_pred", names(summ))]) %>% 
   filter(test_week>=w_vac-2) %>% 
@@ -552,6 +552,60 @@ model_sero %>%
         axis.text.x = element_text(angle = 90),
         plot.title=element_text(hjust=.5))
 
+# same thing but with heatmap of r_VP below
+p1 <-
+  model_sero %>% 
+  cbind(vac_pred=summ[grep("^vac_pred", names(summ))]) %>% 
+  filter(test_week>=w_vac) %>% 
+  group_by(test_week, prev_PCR=factor(ifelse(prev_PCR,"yes","no"),levels=c("yes","no"))) %>%
+  summarise(y=mean(vac_pred)) %>%
+  ungroup() %>% 
+  mutate(date=get_week_start_from_test_week(test_week)) %>% 
+  ggplot() +
+  geom_line(data=data.frame(date=get_week_start_from_test_week(w_vac:W),
+                            prop_vac=cumsum(V[w_vac:W])/N),
+            aes(x=date,y=prop_vac), lty="dashed") +
+  geom_line(aes(date,y,group=prev_PCR,color=prev_PCR)) +
+  scale_color_manual(name="past PCR positive", values=c("#00BFC4", "#F8766D")) +
+  scale_x_date(date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,0))) +
+  scale_y_continuous(name="probability of vaccination",limits=c(0,1),expand=expansion(c(0,0))) +
+  theme_bw() +
+  theme(panel.grid=element_blank(),
+        panel.border=element_blank(),
+        axis.line=element_line(linewidth=.3),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        plot.title=element_text(hjust=.5))
+r_VP_init <- summ["r_VP_init"]
+r_VP_end <- summ["r_VP_end"]
+w_switch <- summ["w_switch"]
+p2 <-
+  data.frame(date = get_week_start_from_test_week(seq(w_vac,W,.01)),
+             r_VP = r_VP_init + pmax(0, (seq(w_vac,W,.01)-w_switch) / (W-w_switch) * (r_VP_end-r_VP_init))) %>%
+  ggplot() +
+  geom_tile(aes(x=date,y=1,fill=r_VP,color=r_VP)) +
+  ylab(expression(paste(italic(r[VP]),"(",italic(w),")"))) +
+  scale_x_date(date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,0))) +
+  scale_y_discrete(expand=c(0,0)) +
+  scale_fill_viridis(option = "plasma",
+                     name = expression(paste(italic(r[VP]),"(",italic(w),")")),
+                     breaks = c(.2,.4,.6),
+                     guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  scale_color_viridis(option = "plasma",
+                     name = expression(paste(italic(r[VP]),"(",italic(w),")")),
+                     breaks = c(.2,.4,.6),
+                     guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
+  theme(axis.line.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.line=element_line(linewidth=.3),
+        axis.text.x = element_text(angle = 90),
+        axis.title.y = element_text(angle = 0),
+        plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
+        legend.key.height = unit(11, "pt"),
+        legend.key.width = unit(17, "pt"))
+
+plot_grid(p1, p2, ncol=1, align="v", rel_heights=c(2.6,1))
 
 
 
