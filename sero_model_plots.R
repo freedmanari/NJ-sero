@@ -644,7 +644,7 @@ prop_infected_by_age(I_best) %>%
   scale_x_date(name="date",date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,0))) +
   scale_y_continuous(name="estimated cumulative proportion infected in NJ",limits=c(0,1),expand=expansion(c(.003,0))) +
   scale_color_discrete(name="age group",
-                       labels=c("0-4","5-11","12-15","16-17","18-29","30-39","40-49","50-64","65-74","75+")) +
+                       labels=c("0-17","18-49","50-64","65+")) +
   theme_bw() +
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
