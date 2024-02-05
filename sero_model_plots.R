@@ -304,7 +304,7 @@ model_sero %>%
   ylab("mean log titer value") +
   xlab("test date") +
   ggtitle(bquote("serology model fit for" ~ italic(r)[italic(SV)] == .(r_SV))) +
-  scale_color_manual(name="past PCR positive", values=c("#00BFC4", "#F8766D")) +
+  scale_color_manual(name="past PCR\npositive", values=c("#00BFC4", "#F8766D")) +
   scale_linetype_discrete(name="titers from...", labels=c("data","predictions")) +
   scale_x_date(date_labels="%b '%y",date_breaks="1 month") +
   scale_y_continuous(breaks=seq(2.5,5,.5)) +
@@ -566,7 +566,7 @@ p1 <-
                             prop_vac=cumsum(V[w_vac:W])/N),
             aes(x=date,y=prop_vac), lty="dashed") +
   geom_line(aes(date,y,group=prev_PCR,color=prev_PCR)) +
-  scale_color_manual(name="past PCR positive", values=c("#00BFC4", "#F8766D")) +
+  scale_color_manual(name="past PCR\npositive", values=c("#00BFC4", "#F8766D")) +
   scale_x_date(date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,0))) +
   scale_y_continuous(name="probability of vaccination",limits=c(0,1),expand=expansion(c(0,0))) +
   theme_bw() +
