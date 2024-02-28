@@ -127,7 +127,7 @@ X1_region %>%
                      sec.axis = sec_axis(~ .*10, name = "population",labels=fancy_scientific)) +
   ylab("total cases") +
   theme(panel.background=element_blank(),
-        axis.line=element_line(size=.4),
+        axis.line=element_line(linewidth=.4),
         legend.title = element_blank(),
         legend.key.size = unit(17,"pt"),
         legend.text = element_text(size=10),
@@ -144,7 +144,7 @@ p1 <- data.frame(date=rep(get_week_start_from_test_week(1:(W-1)),3),
                  type=rep(c("PCR positives","Seropositives","Seropositives with past PCR positive"),each=(W-1)),
                  cases=c(X1[1:(W-1)],X2[1:(W-1)],X12[1:(W-1)])) %>%
   ggplot() +
-  geom_line(aes(date,cases,group=type,color=type),size=1) +
+  geom_line(aes(date,cases,group=type,color=type),linewidth=1) +
   ylab("weekly cases") +
   scale_color_manual(values=c("red3","chartreuse4","dodgerblue3")) +
   scale_x_date(expand=expansion(c(1/(2*(W-2))),1/(2*(W-2)))) +
@@ -155,7 +155,7 @@ p1 <- data.frame(date=rep(get_week_start_from_test_week(1:(W-1)),3),
         axis.ticks.x=element_blank(),
         axis.text.x=element_blank(),
         axis.title.x=element_blank(),
-        axis.line=element_line(size=.3),
+        axis.line=element_line(linewidth=.3),
         legend.position="none",
         plot.margin = unit(c(2.5,5.5,-2.3,5.5), "pt"),
         legend.key.size = unit(12, "pt"))
@@ -166,7 +166,7 @@ p2 <- X1_region %>%
   reframe(date=date,X1=X1/max(X1)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
-  geom_tile(aes(x=date, y=region, fill=X1, color=X1), size=1) +
+  geom_tile(aes(x=date, y=region, fill=X1, color=X1), linewidth=1) +
   scale_fill_gradientn(colors = c("white","red3"),
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
   scale_color_gradientn(colors = c("white","red3"),
@@ -178,7 +178,7 @@ p2 <- X1_region %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank(),
         axis.ticks.y=element_blank(),
-        axis.line.x=element_line(size=.3),
+        axis.line.x=element_line(linewidth=.3),
         axis.line.y=element_blank(),
         plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
         legend.key.height = unit(11, "pt"),
@@ -194,7 +194,7 @@ p3 <- X2_region %>%
   reframe(date=date,X2=X2/max(X2)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
-  geom_tile(aes(x=date, y=region, fill=X2, color=X2), size=1) +
+  geom_tile(aes(x=date, y=region, fill=X2, color=X2), linewidth=1) +
   scale_fill_gradientn(colors=c("white","chartreuse4"),
                        guide=guide_colorbar(frame.color="black",ticks.color="black")) +
   scale_color_gradientn(colors = c("white","chartreuse4"),
@@ -204,7 +204,7 @@ p3 <- X2_region %>%
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank(),
-        axis.line.x=element_line(size=.3),
+        axis.line.x=element_line(linewidth=.3),
         axis.line.y=element_blank(),
         axis.ticks.y=element_blank(),
         plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
@@ -221,7 +221,7 @@ p4 <- X12_region %>%
   reframe(date=date,X12=X12/max(X12)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
-  geom_tile(aes(x=date, y=region, fill=X12, color=X12), size=1) +
+  geom_tile(aes(x=date, y=region, fill=X12, color=X12), linewidth=1) +
   scale_fill_gradientn(colors = c("white","dodgerblue3"),
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
   scale_color_gradientn(colors = c("white","dodgerblue3"),
@@ -233,7 +233,7 @@ p4 <- X12_region %>%
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank(),
         axis.ticks.y=element_blank(),
-        axis.line.x=element_line(size=.4),
+        axis.line.x=element_line(linewidth=.4),
         axis.line.y=element_blank(),
         plot.margin = unit(c(0,5.5,0,5.5), "pt"),
         legend.key.width = unit(14, "pt"),
@@ -263,7 +263,7 @@ plot_grid(p1, p2, p3, p4, ncol=1, align="v", axis=c("lr"), rel_heights=c(2,1,1,1
 #   ylab("region") +
 #   theme(axis.ticks.y=element_blank(),
 #         axis.text.x=element_text(angle = 90),
-#         axis.line.x=element_line(size=.3),
+#         axis.line.x=element_line(linewidth=.3),
 #         axis.line.y=element_blank(),
 #         plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
 #         legend.key.height = unit(11, "pt"),
@@ -297,7 +297,7 @@ prop_prev_pcr <-
 prop_prev_pcr %>%
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
-  geom_tile(aes(x=date, y=region, fill=prop_prev_pcr, color=prop_prev_pcr), size=1) +
+  geom_tile(aes(x=date, y=region, fill=prop_prev_pcr, color=prop_prev_pcr), linewidth=1) +
   scale_fill_gradientn(colors = rainbow_gradient, na.value = "gray80",
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
                        name = stringr::str_wrap("proportion of seropositives with past PCR positive",
@@ -307,7 +307,7 @@ prop_prev_pcr %>%
   scale_y_discrete(expand=c(0,0)) +
   theme(axis.text.x=element_text(angle = 90),
         axis.ticks.y=element_blank(),
-        axis.line.x=element_line(color="black", size=.3),
+        axis.line.x=element_line(color="black", linewidth=.3),
         axis.line.y=element_blank(),
         legend.title=element_text(size=10),
         legend.position="right")
@@ -334,9 +334,9 @@ NJ_counties_grouped <-
 
 
 ggplot() +
-  geom_sf(data=NJ_counties, fill="white", color="gray80", size=0.2) +
-  geom_sf(data=NJ_counties_grouped, fill="transparent", color="gray20", size=.8) +
-  geom_sf_text(data=NJ_counties_grouped,aes(label=region),size=4) +
+  geom_sf(data=NJ_counties, fill="white", color="gray80", linewidth=0.2) +
+  geom_sf(data=NJ_counties_grouped, fill="transparent", color="gray20", linewidth=.8) +
+  geom_sf_text(data=NJ_counties_grouped,aes(label=region),linewidth=4) +
   theme_void() +
   coord_sf(ndiscr = F)
 
@@ -427,7 +427,7 @@ P_region %>%
                      sec.axis = sec_axis(~ ., name = "population",labels=fancy_scientific)) +
   ylab("total testing volume") +
   theme(panel.background=element_blank(),
-        axis.line=element_line(size=.4),
+        axis.line=element_line(linewidth=.4),
         legend.title = element_blank(),
         legend.key.size = unit(17,"pt"),
         legend.text = element_text(size=10),
@@ -446,7 +446,7 @@ p1 <-
              serology=S[1:(W-1)]) %>%
   pivot_longer(cols=-date, names_to="type", values_to="tests") %>% 
   ggplot() +
-  geom_line(aes(x=date,y=tests,group=type,color=type),size=1) +
+  geom_line(aes(x=date,y=tests,group=type,color=type),linewidth=1) +
   scale_x_date(date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,.01))) +
   scale_y_continuous(name="weekly testing volume",
                      expand=expansion(c(.005,.03)),
@@ -457,7 +457,7 @@ p1 <-
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
         panel.background=element_blank(),
-        axis.line=element_line(size=.4),
+        axis.line=element_line(linewidth=.4),
         axis.text.x=element_blank(),
         axis.title.x=element_blank(),
         axis.ticks.x=element_blank(),
@@ -471,7 +471,7 @@ p2 <-
   reframe(date=date,P=P/max(P)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
-  geom_tile(aes(x=date, y=region, fill=P, color=P), size=1) +
+  geom_tile(aes(x=date, y=region, fill=P, color=P), linewidth=1) +
   scale_fill_gradientn(colors = c("white","red3"),
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
   scale_color_gradientn(colors = c("white","red3"),
@@ -483,7 +483,7 @@ p2 <-
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank(),
         axis.ticks.y=element_blank(),
-        axis.line.x=element_line(size=.3),
+        axis.line.x=element_line(linewidth=.3),
         axis.line.y=element_blank(),
         plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
         legend.key.height = unit(11, "pt"),
@@ -500,7 +500,7 @@ p3 <-
   reframe(date=date,S=S/max(S)) %>% 
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
-  geom_tile(aes(x=date, y=region, fill=S, color=S), size=1) +
+  geom_tile(aes(x=date, y=region, fill=S, color=S), linewidth=1) +
   scale_fill_gradientn(colors = c("white","chartreuse4"),
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black")) +
   scale_color_gradientn(colors = c("white","chartreuse4"),
@@ -510,7 +510,7 @@ p3 <-
   ylab("region") +
   theme(axis.text.x=element_text(angle=90),
         axis.ticks.y=element_blank(),
-        axis.line.x=element_line(size=.4),
+        axis.line.x=element_line(linewidth=.4),
         axis.line.y=element_blank(),
         plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
         legend.key.height = unit(11, "pt"),
@@ -542,7 +542,7 @@ prop_prev_pcr_all <-
 prop_prev_pcr_all %>%
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
-  geom_tile(aes(x=date, y=region, fill=prop_prev_pcr, color=prop_prev_pcr), size=1) +
+  geom_tile(aes(x=date, y=region, fill=prop_prev_pcr, color=prop_prev_pcr), linewidth=1) +
   scale_fill_gradientn(colors = rainbow_gradient, na.value = "gray80",
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
                        name = stringr::str_wrap("proportion of serology tests with past PCR positive",
@@ -552,7 +552,7 @@ prop_prev_pcr_all %>%
   scale_y_discrete(expand=c(0,0)) +
   theme(axis.text.x=element_text(angle = 90),
         axis.ticks.y=element_blank(),
-        axis.line.x=element_line(color="black", size=.3),
+        axis.line.x=element_line(color="black", linewidth=.3),
         axis.line.y=element_blank(),
         legend.title=element_text(size=10),
         legend.position="right")
@@ -582,7 +582,7 @@ p1 <-
              serology=X2[1:(W-1)]/S[1:(W-1)]) %>%
   pivot_longer(cols=-date, names_to="type", values_to="tests") %>% 
   ggplot() +
-  geom_line(aes(x=date,y=tests,group=type,color=type),size=1) +
+  geom_line(aes(x=date,y=tests,group=type,color=type),linewidth=1) +
   scale_x_date(date_labels="%b '%y",date_breaks="1 month",expand=expansion(c(0,.01))) +
   scale_y_continuous(name="test positivity",
                      expand=expansion(c(.017,.03)),
@@ -592,7 +592,7 @@ p1 <-
   theme(panel.grid=element_blank(),
         panel.border=element_blank(),
         panel.background=element_blank(),
-        axis.line=element_line(size=.4),
+        axis.line=element_line(linewidth=.4),
         axis.text.x=element_blank(),
         axis.title.x=element_blank(),
         axis.ticks.x=element_blank(),
@@ -604,7 +604,7 @@ p2 <-
   P_positivity_region %>%
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
-  geom_tile(aes(x=date, y=region, fill=P_positivity, color=P_positivity), size=1) +
+  geom_tile(aes(x=date, y=region, fill=P_positivity, color=P_positivity), linewidth=1) +
   scale_fill_gradientn(colors = c("white","red3","black"), values=c(0,max_positivity_less_than_1,1),
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
                        limits=c(0,1)) +
@@ -618,7 +618,7 @@ p2 <-
         axis.ticks.x=element_blank(),
         axis.title.x=element_blank(),
         axis.ticks.y=element_blank(),
-        axis.line.x=element_line(size=.3),
+        axis.line.x=element_line(linewidth=.3),
         axis.line.y=element_blank(),
         plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
         legend.key.height = unit(11, "pt"),
@@ -633,7 +633,7 @@ p3 <-
   S_positivity_region %>%
   filter(date < get_week_start_from_test_week(W)) %>% 
   ggplot() +
-  geom_tile(aes(x=date, y=region, fill=S_positivity, color=S_positivity), size=1) +
+  geom_tile(aes(x=date, y=region, fill=S_positivity, color=S_positivity), linewidth=1) +
   scale_fill_gradientn(colors = c("white","chartreuse4","black"), values=c(0,max_positivity_less_than_1,1), na.value = "gray80",
                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
                        limits=c(0,1)) +
@@ -645,7 +645,7 @@ p3 <-
   ylab("region") +
   theme(axis.text.x=element_text(angle=90),
         axis.ticks.y=element_blank(),
-        axis.line.x=element_line(size=.4),
+        axis.line.x=element_line(linewidth=.4),
         axis.line.y=element_blank(),
         plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
         legend.key.height = unit(11, "pt"),
@@ -665,7 +665,7 @@ plot_grid(p1, aligned[[1]], aligned[[2]], ncol=1, align="v", axis=c("lr"), rel_h
 # S_positivity_region %>%
 #   filter(date < get_week_start_from_test_week(W)) %>% 
 #   ggplot() +
-#   geom_tile(aes(x=date, y=region, fill=S_positivity, color=S_positivity), size=1) +
+#   geom_tile(aes(x=date, y=region, fill=S_positivity, color=S_positivity), linewidth=1) +
 #   scale_fill_gradientn(colors = c("white","gray25"), na.value = "gray80",
 #                        guide = guide_colorbar(frame.colour = "black", ticks.colour = "black"),
 #                        limits=c(0,max_positivity_less_than_1)) +
@@ -677,7 +677,7 @@ plot_grid(p1, aligned[[1]], aligned[[2]], ncol=1, align="v", axis=c("lr"), rel_h
 #   ylab("region") +
 #   theme(axis.ticks.y=element_blank(),
 #         axis.text.x=element_text(angle = 90),
-#         axis.line.x=element_line(size=.3),
+#         axis.line.x=element_line(linewidth=.3),
 #         axis.line.y=element_blank(),
 #         plot.margin = unit(c(0,5.5,-2.3,5.5), "pt"),
 #         legend.key.height = unit(11, "pt"),
