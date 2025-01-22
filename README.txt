@@ -1,3 +1,5 @@
+Github repository to accompany "Inferring COVID-19 testing and vaccination behavior from New Jersey testing data", published in PNAS on April 17, 2024. Authors: Ari S. Freedman, Justin K. Sheen, Stella Tsai, Jihong Yao, Edward Lifshitz, David Adinaro, Simon A. Levin, Bryan T. Grenfell, and C. Jessica E. Metcalf.
+
 Data and code in NJ-sero repository at https://github.com/freedmanari
 - All code by Ari S. Freedman
 - Scripts (not included) for acquiring data from New Jersey (NJ) Department of Health all written by Justin K. Sheen
